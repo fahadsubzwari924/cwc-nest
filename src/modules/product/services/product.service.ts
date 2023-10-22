@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/entities/product.entity';
 import { In, Repository } from 'typeorm';
 import { IProduct } from '../interfaces/product';
+import { PaginationAndSortingDTO } from '../../../core/pagination/paginationAndSorting.dto';
+import { paginateAndSort } from '../../../core/pagination/paginationAndSort.service';
+import { IPaginationResponseMeta } from 'src/core/pagination/pagination-response-metadata.interface';
 
 export class ProductService {
   constructor(
@@ -10,9 +13,10 @@ export class ProductService {
     private productRepository: Repository<Product>,
   ) {}
 
-  async getAllProducts(): Promise<Array<Product>> {
-    const products = this.productRepository.find({ order: { createdAt: -1 } });
-    return products;
+  async getAllProducts(
+    paginationAndSortingDto: PaginationAndSortingDTO,
+  ): Promise<{ records: Array<Product>; metadata: IPaginationResponseMeta }> {
+    return paginateAndSort(this.productRepository, paginationAndSortingDto);
   }
 
   async getAllProductsByIds(

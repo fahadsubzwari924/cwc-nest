@@ -13,7 +13,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
   private readonly logger: Logger;
   catch(exception: Error, host: ArgumentsHost): any {
     console.log('--Exception--', exception['detail']);
-    console.log(exception);
+    console.log('exception: ', exception);
     const ctx = host.switchToHttp();
     const request = ctx.getRequest();
     const response = ctx.getResponse();
@@ -24,7 +24,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
     const message =
       exception instanceof HttpException
-        ? exception.message || exception.message['error']
+        ? exception['response']['message'] || exception.message['error']
         : exception['detail'];
 
     const devErrorResponse: any = {

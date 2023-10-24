@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/entities/product.entity';
-import { FindOneOptions, In, Repository } from 'typeorm';
+import { DeleteResult, FindOneOptions, In, Repository } from 'typeorm';
 import { IProduct } from '../interfaces/product';
 import { PaginationAndSortingDTO } from '../../../core/pagination/paginationAndSorting.dto';
 import { paginateAndSort } from '../../../core/pagination/paginationAndSort.service';
@@ -38,7 +38,7 @@ export class ProductService {
     if (product) {
       return product;
     }
-    throw new NotFoundException('Could not find the message');
+    throw new NotFoundException('Product not found');
   }
 
   async createProduct(product: IProduct): Promise<Product> {
@@ -77,5 +77,14 @@ export class ProductService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async deleteProduct(id: number): Promise<DeleteResult> {
+    const deletedProduct = await this.productRepository.delete(id);
+    if (!deletedProduct.affected) {
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+    }
+
+    return deletedProduct;
   }
 }

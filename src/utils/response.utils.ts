@@ -5,9 +5,9 @@ import { CustomErrorResponse } from '../core/interfaces/controller-response.inte
  *
  * @param   {object} data
  */
-export const createResponse = (data: any) => {
+export const createResponse = (result: any) => {
   return {
-    payload: data,
+    payload: result.records,
     error: false,
   };
 };

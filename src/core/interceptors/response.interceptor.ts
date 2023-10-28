@@ -4,19 +4,23 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { createResponse } from '../../utils/response.utils';
-import { CustomResponse } from '../interfaces/controller-response.interface';
+import { Observable, catchError, map, of } from 'rxjs';
+import { GenericResponseDto } from '../dtos/generic-response.dto';
 
 @Injectable()
-export class ResponseInterceptor<T>
-  implements NestInterceptor<T, CustomResponse>
-{
-  intercept(
-    context: ExecutionContext,
-    next: CallHandler,
-  ): Observable<CustomResponse> {
-    return next.handle().pipe(map((data: any) => createResponse(data)));
+export class ResponseInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
+    return handler.handle().pipe(
+      map((data: any) => {
+        console.log(data);
+        return new GenericResponseDto({
+          records: data?.data,
+          metadata: data?.metadata,
+        });
+      }),
+      catchError((err) => {
+        return of(new GenericResponseDto({ error: err }));
+      }),
+    );
   }
 }

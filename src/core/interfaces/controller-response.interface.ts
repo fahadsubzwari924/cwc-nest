@@ -1,6 +1,6 @@
-export interface CustomResponse {
-  payload: any;
-  error?: boolean;
+export interface ICustomResponse {
+  data: any;
+  metadata?: any;
 }
 
 export interface CustomErrorResponse {

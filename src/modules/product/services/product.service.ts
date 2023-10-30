@@ -16,7 +16,7 @@ export class ProductService {
 
   async getAllProducts(
     paginationAndSortingDto: PaginationAndSortingDTO,
-  ): Promise<{ records: Array<Product>; metadata: IPaginationResponseMeta }> {
+  ): Promise<{ data: Array<Product>; metadata: IPaginationResponseMeta }> {
     return paginateAndSort(this.productRepository, paginationAndSortingDto);
   }
 

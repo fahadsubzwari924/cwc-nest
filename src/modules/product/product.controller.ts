@@ -9,12 +9,11 @@ import {
   Delete,
   NotFoundException,
 } from '@nestjs/common';
-import { Product } from 'src/entities/product.entity';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { ProductService } from './services/product.service';
 import { PaginationAndSortingDTO } from '../../core/pagination/paginationAndSorting.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
-import { DeleteResult } from 'typeorm';
+import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
 
 @Controller('products')
 export class ProductController {
@@ -30,35 +29,38 @@ export class ProductController {
   }
 
   @Get(':id')
-  async getProductById(@Param('id') id: string): Promise<Product> {
+  async getProductById(@Param('id') id: string): Promise<ICustomResponse> {
     const product = await this.productService.getProductById(Number(id));
-    return product;
+    return { data: product, metadata: { productId: Number(id) } };
   }
 
   @Post()
-  async createProduct(@Body() product: CreateProductDto) {
+  async createProduct(
+    @Body() product: CreateProductDto,
+  ): Promise<ICustomResponse> {
     const newProduct = await this.productService.createProduct(product);
-    return newProduct;
+    return { data: newProduct };
   }
 
   @Put(':id')
   async updateProduct(
     @Param('id') id: string,
     @Body() product: UpdateProductDto,
-  ) {
+  ): Promise<ICustomResponse> {
     const newProduct = await this.productService.updateProduct(
       Number(id),
       product,
     );
-    return newProduct;
+    return { data: newProduct, metadata: { productId: Number(id) } };
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<DeleteResult> {
+  async delete(@Param('id') id: number): Promise<ICustomResponse> {
     const product = await this.productService.getProductById(id);
     if (!product) {
       throw new NotFoundException('Product does not exist!');
     }
-    return this.productService.deleteProduct(id);
+    await this.productService.deleteProduct(id);
+    return { data: true, metadata: { productId: Number(id) } };
   }
 }

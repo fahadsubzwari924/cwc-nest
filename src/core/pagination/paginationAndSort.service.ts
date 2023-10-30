@@ -5,7 +5,7 @@ import { IPaginationResponseMeta } from './pagination-response-metadata.interfac
 export async function paginateAndSort<Entity>(
   repository: Repository<Entity>,
   dto: PaginationAndSortingDTO,
-): Promise<{ records: Entity[]; metadata: IPaginationResponseMeta }> {
+): Promise<{ data: Entity[]; metadata: IPaginationResponseMeta }> {
   const { page, pageSize, sortBy, sortOrder } = dto;
 
   const skip = (page - 1) * pageSize;
@@ -27,5 +27,5 @@ export async function paginateAndSort<Entity>(
     sortOrder,
   };
 
-  return { records, metadata: paginationMeta };
+  return { data: records, metadata: paginationMeta };
 }

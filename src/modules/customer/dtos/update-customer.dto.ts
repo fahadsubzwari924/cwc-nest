@@ -8,7 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class CreateCustomerDto {
+export class UpdateCustomerDto {
 
   @ApiProperty()
   @IsString()

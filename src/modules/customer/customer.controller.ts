@@ -39,14 +39,14 @@ export class CustomerController {
   }
 
   @Put(':id')
-  async updateProduct(
+  async updateCustomer(
     @Param('id') id: string,
-    @Body() customer: UpdateCustomerDto 
+    @Body() customer: UpdateCustomerDto
   ): Promise<ICustomResponse> {
 
     const updatedCustomer = await this.customerService.updateCustomer(
       Number(id),
-      customer,
+      customer
     );
 
     return { data: updatedCustomer, metadata: { customerId: Number(id) }};

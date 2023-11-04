@@ -49,12 +49,12 @@ export class CustomerController {
 
   @Delete(':id')
   async delete(@Param('id') id: number): Promise<ICustomResponse> {
-    const product = await this.customerService.getCustomerById(id);
-    if (!product) {
+    const customer = await this.customerService.getCustomerById(id);
+    if (!customer) {
       throw new NotFoundException('Product does not exist!');
     }
     await this.customerService.deletedCustomer(id);
-    return { data: true, metadata: { productId: Number(id) } };
+    return { data: true, metadata: { customerId: Number(id) } };
   }
   
 }

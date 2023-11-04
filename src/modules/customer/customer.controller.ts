@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { Customer } from 'src/entities/customer.entity';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { CustomerService } from './services/customer.service';
+import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
+import { UpdateCustomerDto } from './dtos/update-customer.dto';
 
 @Controller('customers')
 export class CustomerController {
@@ -29,8 +31,25 @@ export class CustomerController {
   }
 
   @Post()
-  async createProduct(@Body() customer: CreateCustomerDto) {
+  async createCustomer(
+    @Body() customer: CreateCustomerDto,
+  ): Promise<ICustomResponse> {
     const newCustomer = await this.customerService.createCustomer(customer);
-    return newCustomer;
+    return { data: newCustomer };
   }
+
+  @Put(':id')
+  async updateCustomer(
+    @Param('id') id: string,
+    @Body() customer: UpdateCustomerDto
+  ): Promise<ICustomResponse> {
+
+    const updatedCustomer = await this.customerService.updateCustomer(
+      Number(id),
+      customer
+    );
+
+    return { data: updatedCustomer, metadata: { customerId: Number(id) }};
+  }
+  
 }

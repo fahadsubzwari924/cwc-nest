@@ -6,7 +6,7 @@ import { IPaginationResponseMeta } from 'src/core/pagination/pagination-response
 import { paginateAndSort } from 'src/core/pagination/paginationAndSort.service';
 import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 import { Customer } from 'src/entities/customer.entity';
-import { Repository, FindOneOptions } from 'typeorm';
+import { Repository, FindOneOptions, DeleteResult } from 'typeorm';
 
 export class CustomerService {
   constructor(
@@ -69,4 +69,14 @@ export class CustomerService {
     }
 
   }
+
+  async deletedCustomer(id: number): Promise<DeleteResult> {
+    const deletedCustomer = await this.customerRepository.delete(id);
+    if (!deletedCustomer.affected) {
+      throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+    }
+
+    return deletedCustomer;
+  }
+
 }

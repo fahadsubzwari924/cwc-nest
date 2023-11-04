@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b10aba39-a95d-4485-b363-b92a99900076",
+		"_postman_id": "c25de8b5-c37c-4802-a95e-035050fd35e2",
 		"name": "CWC",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "2089160"
+		"_exporter_id": "4433485"
 	},
 	"item": [
 		{
@@ -149,10 +149,10 @@
 									]
 								}
 							},
-							"_postman_previewlanguage": null,
-							"header": null,
+							"_postman_previewlanguage": "Text",
+							"header": [],
 							"cookie": [],
-							"body": null
+							"body": ""
 						}
 					]
 				},

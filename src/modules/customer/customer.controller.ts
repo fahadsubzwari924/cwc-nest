@@ -20,7 +20,7 @@ export class CustomerController {
   }
 
   @Get(':id')
-  async getCustomerId(@Param('id') id: string): Promise<ICustomResponse> {
+  async getCustomerById(@Param('id') id: string): Promise<ICustomResponse> {
     const customer = await this.customerService.getCustomerById(Number(id));
     return { data: customer, metadata: { customerId: Number(id) } };
   }

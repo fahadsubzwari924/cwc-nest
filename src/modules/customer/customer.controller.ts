@@ -51,7 +51,7 @@ export class CustomerController {
   async delete(@Param('id') id: number): Promise<ICustomResponse> {
     const customer = await this.customerService.getCustomerById(id);
     if (!customer) {
-      throw new NotFoundException('Product does not exist!');
+      throw new NotFoundException('Customer does not exist!');
     }
     await this.customerService.deletedCustomer(id);
     return { data: true, metadata: { customerId: Number(id) } };

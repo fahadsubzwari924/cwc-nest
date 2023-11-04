@@ -17,10 +17,7 @@ export class ResponseInterceptor implements NestInterceptor {
           records: data?.data,
           metadata: data?.metadata,
         });
-      }),
-      catchError((err) => {
-        return of(new GenericResponseDto({ error: err }));
-      }),
+      })
     );
   }
 }

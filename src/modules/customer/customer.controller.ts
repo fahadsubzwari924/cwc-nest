@@ -1,33 +1,28 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { Customer } from 'src/entities/customer.entity';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { CustomerService } from './services/customer.service';
 import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
+import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 
 @Controller('customers')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
   @Get()
-  async getAllProducts() {
+  async getAllCustomers(@Query() query: PaginationAndSortingDTO) {
     try {
-      const products = await this.customerService.getAllCustomers();
-      return {
-        records: products,
-        metadata: {
-          count: products.length,
-        },
-      };
+      return await this.customerService.getAllCustomers(query);
     } catch (error) {
       console.log(error);
     }
   }
 
   @Get(':id')
-  async getProductById(@Param('id') id: string): Promise<Customer> {
+  async getCustomerById(@Param('id') id: string): Promise<ICustomResponse> {
     const customer = await this.customerService.getCustomerById(Number(id));
-    return customer;
+    return { data: customer, metadata: { customerId: Number(id) } };
   }
 
   @Post()

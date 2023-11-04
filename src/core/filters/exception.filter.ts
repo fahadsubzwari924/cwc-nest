@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { createErrorResponse, createResponse } from 'src/utils/response.utils';
+import { GenericResponseDto } from '../dtos/generic-response.dto';
 
 @Catch()
 export class CustomExceptionFilter implements ExceptionFilter {
@@ -42,6 +43,6 @@ export class CustomExceptionFilter implements ExceptionFilter {
     );
     response
       .status(statusCode)
-      .json(createErrorResponse({ statusCode, message }));
+      .json(new GenericResponseDto({ error: exception?.message }));
   }
 }

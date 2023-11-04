@@ -2,6 +2,9 @@ import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { ICustomer } from 'src/core/interfaces/customer.interface';
+import { IPaginationResponseMeta } from 'src/core/pagination/pagination-response-metadata.interface';
+import { paginateAndSort } from 'src/core/pagination/paginationAndSort.service';
+import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 import { Customer } from 'src/entities/customer.entity';
 import { Repository, FindOneOptions } from 'typeorm';
 
@@ -11,9 +14,10 @@ export class CustomerService {
     private customerRepository: Repository<Customer>,
   ) {}
 
-  async getAllCustomers(): Promise<Array<Customer>> {
-    const customer = this.customerRepository.find();
-    return customer;
+  async getAllCustomers(
+    paginationAndSortingDto: PaginationAndSortingDTO
+  ): Promise<{ data: Array<Customer>; metadata: IPaginationResponseMeta }> {
+    return paginateAndSort(this.customerRepository, paginationAndSortingDto);
   }
 
   async getCustomerById(id: number): Promise<Customer> {
@@ -25,7 +29,7 @@ export class CustomerService {
     if (customer) {
       return customer;
     }
-    throw new NotFoundException('Could not find the customer');
+    throw new NotFoundException('Customer not found');
   }
 
   async createCustomer(customer: ICustomer): Promise<Customer> {

@@ -1,40 +1,33 @@
 {
 	"info": {
-		"_postman_id": "eccf69f6-65d4-4a47-b248-5968c713c371",
-		"name": "Youtube_blog",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"_postman_id": "b10aba39-a95d-4485-b363-b92a99900076",
+		"name": "CWC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2089160"
 	},
 	"item": [
 		{
-			"name": "Blog-Entry",
+			"name": "Product",
 			"item": [
 				{
-					"name": "[Blog-Entry] Upload Image",
+					"name": "Create Product",
+					"protocolProfileBehavior": {
+						"strictSSL": false
+					},
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoidXBkYXRlZE5hbWU2NTU1YWEiLCJ1c2VybmFtZSI6InVwZGF0ZWRVc2VybmFtZWQiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiIsInByb2ZpbGVJbWFnZSI6ImJpZ2ZpbGUwOWQxNTY0Ny0wMzBlLTRlMzEtODFmYy0yZmMzNGVhMjQ2MmUucG5nIn0sImlhdCI6MTU5NzU3ODM1MywiZXhwIjoxNTk3NTg4MzUzfQ.VxwfuFApPlfeGCV4QH3gxICQQZWnkhJx4oHTrcvYuck",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [],
 						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "file",
-									"type": "file",
-									"src": "/C:/Users/thoma/OneDrive/Bilder/test images/Download.jpg"
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"test10 product\",\n    \"description\": \"Customize blue color vaaulid with picture printing\",\n    \"cost\": 700,\n    \"price\": 1200,\n    \"weight\": \"2.3g\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
 								}
-							]
+							}
 						},
 						"url": {
-							"raw": "http://localhost:3000/api/blog-entries/image/upload",
+							"raw": "http://localhost:3000/api/v1/products",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -42,135 +35,24 @@
 							"port": "3000",
 							"path": [
 								"api",
-								"blog-entries",
-								"image",
-								"upload"
+								"v1",
+								"products"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "[Blog-Entry] Download Image",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3000/api/blog-entries/image/Download770320c0-2b30-443a-8c14-2d58f58e7279.jpg",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"blog-entries",
-								"image",
-								"Download770320c0-2b30-443a-8c14-2d58f58e7279.jpg"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All BlogEntries Paginated",
+					"name": "Update Product",
 					"protocolProfileBehavior": {
-						"disableBodyPruning": true
+						"strictSSL": false
 					},
 					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
-						"url": {
-							"raw": "http://localhost:3000/api/blog-entries",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"blog-entries"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Blog Entry (Jwt Protected)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoidXBkYXRlZE5hbWU2IiwidXNlcm5hbWUiOiJ1cGRhdGVkVXNlcm5hbWUiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiIsInByb2ZpbGVJbWFnZSI6IlRodW1ibmFpbE5FVTI4OGJjZTI4LTNhYTUtNDNiNy1hODQ4LTg2MzBjMmY1N2MzZC5wbmcifSwiaWF0IjoxNTk2NTYwNDQ1LCJleHAiOjE1OTY1NzA0NDV9.yy7iQpGGNKj9_L0MVxZbNFeEhVJzLRsH0S5kYO5Zavg",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3000/api/blog-entries/15",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"blog-entries",
-								"15"
-							]
-						},
-						"description": "Only the author of a blog entry can delete the blogEntry"
-					},
-					"response": []
-				},
-				{
-					"name": "Get All BlogEntries by UserId",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3000/api/blog-entries/user/7",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"blog-entries",
-								"user",
-								"7"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update blogEntry (protected by jwt)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoidXBkYXRlZE5hbWU2IiwidXNlcm5hbWUiOiJ1cGRhdGVkVXNlcm5hbWUiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiIsInByb2ZpbGVJbWFnZSI6IlRodW1ibmFpbE5FVTI4OGJjZTI4LTNhYTUtNDNiNy1hODQ4LTg2MzBjMmY1N2MzZC5wbmcifSwiaWF0IjoxNTk2NTYwNzUyLCJleHAiOjE1OTY1NzA3NTJ9.EdCAciuQ1IeyXtZ2q-TBf5-gX2hLQqYVtQ7AnTWKQGo",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"updated title again\"\r\n}",
+							"raw": "{\n    \"weight\": \"300gm\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -178,7 +60,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:3000/api/blog-entries/16",
+							"raw": "http://localhost:3000/api/v1/products/42",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -186,75 +68,25 @@
 							"port": "3000",
 							"path": [
 								"api",
-								"blog-entries",
-								"16"
-							]
-						},
-						"description": "Only the author can update a blogEntry"
-					},
-					"response": []
-				},
-				{
-					"name": "FindOne() Blog Request",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3000/api/blog-entries/14",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"blog-entries",
-								"14"
+								"v1",
+								"products",
+								"42"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Get BlogEntries by user (with query Param)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3000/api/blog-entries/user/7",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"blog-entries",
-								"user",
-								"7"
-							]
-						}
+					"name": "Delete Product By ID",
+					"protocolProfileBehavior": {
+						"strictSSL": false
 					},
-					"response": []
-				},
-				{
-					"name": "Create Blog Entry (jwt needed)",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoidXBkYXRlZE5hbWU2NTU1YWEiLCJ1c2VybmFtZSI6InVwZGF0ZWRVc2VybmFtZWQiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiIsInByb2ZpbGVJbWFnZSI6ImJpZ2ZpbGUwOWQxNTY0Ny0wMzBlLTRlMzEtODFmYy0yZmMzNGVhMjQ2MmUucG5nIn0sImlhdCI6MTU5Nzk0ODA0MiwiZXhwIjoxNTk3OTU4MDQyfQ.eY2JDUJu_qF-AwswgC8dwNpzSMxTcwotsfQxWkpw0QE",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"Test Title7\",\r\n    \"description\": \"test description7\",\r\n    \"body\": \"test body7\"\r\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -262,7 +94,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:3000/api/blog-entries",
+							"raw": "http://localhost:3000/api/v1/products/24",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -270,56 +102,123 @@
 							"port": "3000",
 							"path": [
 								"api",
-								"blog-entries"
+								"v1",
+								"products",
+								"24"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/products",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"products"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get Products",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/api/v1/products",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"v1",
+										"products"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "Get Product By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/products/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Products By Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/products/search?name=test7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"search"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "test7"
+								}
 							]
 						}
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
-			"name": "User",
+			"name": "Customer",
 			"item": [
 				{
-					"name": "Get All Users",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoiVGhvbWFzIFRlc3QiLCJ1c2VybmFtZSI6IlRob21hczUiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiJ9LCJpYXQiOjE1OTAwNzc2NzMsImV4cCI6MTU5MDA4NzY3M30.mlK5PEO-GrXtUJ_Px8ja2-G5XSxTEOamiwCj_9jUUUY",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3000/api/users",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add new user",
+					"name": "Create Customer",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Thomas Test\",\n\t\"username\": \"Thomasa5\",\n\t\"email\": \"thomas@testa5.de\",\n\t\"password\": \"asd\",\n\t\"role\": \"admin\"\n}",
+							"raw": "{\n    \"fullName\": \"Anas Subzwari\",\n    \"age\": 20,\n    \"country\": \"Pakistan\",\n    \"city\": \"Karachi\",\n    \"address\": \"B-17/519, Indus Mehran Society\",\n    \"contactNumber\": \"+923132953154\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -327,7 +226,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:3000/api/users/",
+							"raw": "http://localhost:3000/api/v1/customers",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -335,20 +234,20 @@
 							"port": "3000",
 							"path": [
 								"api",
-								"users",
-								""
+								"v1",
+								"customers"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Get Single user by id",
+					"name": "Get All Customers",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3000/api/users/7",
+							"raw": "http://localhost:3000/api/v1/customers",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -356,203 +255,20 @@
 							"port": "3000",
 							"path": [
 								"api",
-								"users",
-								"7"
+								"v1",
+								"customers"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Delete One",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoidXBkYXRlZE5hbWU2IiwidXNlcm5hbWUiOiJ1cGRhdGVkVXNlcm5hbWUiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiIsInByb2ZpbGVJbWFnZSI6IlRodW1ibmFpbE5FVTI4OGJjZTI4LTNhYTUtNDNiNy1hODQ4LTg2MzBjMmY1N2MzZC5wbmcifSwiaWF0IjoxNTk2NTU5MzU0LCJleHAiOjE1OTY1NjkzNTR9.4-YNmRkNEkBVM9YvCtmDYeYMIJFhCMkemM-w7DwgOWc",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3000/api/users/14",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users",
-								"14"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update One",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoidXBkYXRlZE5hbWUzIiwidXNlcm5hbWUiOiJ1cGRhdGVkVXNlcm5hbWUiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiIsInByb2ZpbGVJbWFnZSI6IlRodW1ibmFpbE5FVWExZDY3OTNhLWRjY2MtNDU0Mi1hNzcyLTFlN2JkMjJiZWU4ZS5wbmcifSwiaWF0IjoxNTk0MDY2NTQyLCJleHAiOjE1OTQwNzY1NDJ9.Fhq4Dwiphc87fj-WDtmVXQUQhOkwbCCKjHfdKQGUKHE",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"updatedName5\",\n\t\"username\": \"updatedUsername\",\n\t\"email\": \"shouldNotWork\",\n\t\"password\": \"shouldNotwork\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3000/api/users/7",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users",
-								"7"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"email\": \"thomas@test5.de\",\n\t\"password\": \"asd\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3000/api/users/login",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Role of User (Protected with JWT and Role)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoiVGhvbWFzIFRlc3QiLCJ1c2VybmFtZSI6IlRob21hczUiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiJ9LCJpYXQiOjE1OTAwOTA2OTIsImV4cCI6MTU5MDEwMDY5Mn0.fecCSraKPluFP0oDHOjkKfP2jf-YWBMUIySSp2WjEc0",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"role\": \"editor\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3000/api/users/3/role",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users",
-								"3",
-								"role"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Upload Profile Picture (with form-data and jwt)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJuYW1lIjoidXBkYXRlZE5hbWU1IiwidXNlcm5hbWUiOiJ1cGRhdGVkVXNlcm5hbWUiLCJlbWFpbCI6InRob21hc0B0ZXN0NS5kZSIsInJvbGUiOiJhZG1pbiIsInByb2ZpbGVJbWFnZSI6IlRodW1ibmFpbE5FVWExZDY3OTNhLWRjY2MtNDU0Mi1hNzcyLTFlN2JkMjJiZWU4ZS5wbmcifSwiaWF0IjoxNTk1MDU3NzI1LCJleHAiOjE1OTUwNjc3MjV9.LkCfWm7G3_VO1z5wzy_lgpQMZVKxHmbJL-VkDYbeujU",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "file",
-									"type": "file",
-									"src": "/C:/Users/thoma/Videos/youtube-public/blog-public/14/Thumbnail NEU.png"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://localhost:3000/api/users/upload",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users",
-								"upload"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Download Prfoile Image",
+					"name": "Get Customer By ID",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3000/api/users/profile-image/ThumbnailNEU288bce28-3aa5-43b7-a848-8630c2f57c3d.png",
+							"raw": "http://localhost:3000/api/v1/customers/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -560,39 +276,71 @@
 							"port": "3000",
 							"path": [
 								"api",
-								"users",
-								"profile-image",
-								"ThumbnailNEU288bce28-3aa5-43b7-a848-8630c2f57c3d.png"
+								"v1",
+								"customers",
+								"1"
 							]
 						}
 					},
 					"response": []
 				}
-			],
-			"event": [
+			]
+		},
+		{
+			"name": "Order",
+			"item": [
 				{
-					"listen": "prerequest",
-					"script": {
-						"id": "e05d518c-0229-4a60-ad22-5a4ddfbe322d",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Customized waullet\",\n    \"quantity\": 1,\n    \"amount\": 1500,\n    \"paymentMethod\": \"cashOnDelivery\",\n    \"customizeName\": \"Faizan\",\n    \"weight\": \"2.5g\",\n    \"customerId\": 1,\n    \"productIds\": [1,2,4, 38]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"orders"
+							]
+						}
+					},
+					"response": []
 				},
 				{
-					"listen": "test",
-					"script": {
-						"id": "52b6841d-906b-4888-8ac3-2ce78f1b3c07",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"orders"
+							]
+						}
+					},
+					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

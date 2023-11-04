@@ -14,7 +14,6 @@ export class PaginationAndSortingDTO {
   pageSize = 10; // Default value for 'pageSize' is 10
 
   @IsOptional()
-  @IsIn(['name', 'cost', 'price', 'weight', 'createdAt'])
   sortBy = 'createdAt'; // Default sorting column
 
   @IsOptional()

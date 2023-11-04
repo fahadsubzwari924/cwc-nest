@@ -162,7 +162,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3000/api/v1/products/1",
+							"raw": "http://localhost:3000/api/v1/products/111",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -172,7 +172,7 @@
 								"api",
 								"v1",
 								"products",
-								"1"
+								"111"
 							]
 						}
 					},

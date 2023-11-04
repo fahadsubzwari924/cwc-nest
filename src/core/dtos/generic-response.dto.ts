@@ -4,7 +4,7 @@ export class GenericResponseDto<T> {
   error?: string;
 
   constructor(data: any) {
-    this.payload = data?.records;
+    this.payload = data?.records ?? null;
     this.metadata = data?.metadata ?? {};
     this.error = data.error;
   }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query } from '@nestjs/common';
 import { Customer } from 'src/entities/customer.entity';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { CustomerService } from './services/customer.service';
@@ -45,6 +45,16 @@ export class CustomerController {
     );
 
     return { data: updatedCustomer, metadata: { customerId: Number(id) }};
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: number): Promise<ICustomResponse> {
+    const customer = await this.customerService.getCustomerById(id);
+    if (!customer) {
+      throw new NotFoundException('Customer does not exist!');
+    }
+    await this.customerService.deletedCustomer(id);
+    return { data: true, metadata: { customerId: Number(id) } };
   }
   
 }

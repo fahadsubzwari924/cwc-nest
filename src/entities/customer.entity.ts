@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -14,6 +15,7 @@ export class Customer extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index('customerNameIdx')
   @Column({
     nullable: true,
     length: 100,
@@ -36,6 +38,7 @@ export class Customer extends BaseEntity {
   })
   address: string;
 
+  @Index('customerContactIdx')
   @Column({
     nullable: false,
   })

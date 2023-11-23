@@ -19,6 +19,19 @@ import { ICustomResponse } from 'src/core/interfaces/controller-response.interfa
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
+  @Get('search')
+  async searchProducts(@Query('searchTerm') searchTerm: string) {
+    try {
+      if (!searchTerm) {
+        return { data: [], metadata: { searchTerm } };
+      }
+      const products = await this.productService.searchProduct(searchTerm);
+      return { data: products, metadata: { searchTerm } };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   @Get()
   async getAllProducts(@Query() query: PaginationAndSortingDTO) {
     try {

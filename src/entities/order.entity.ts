@@ -6,10 +6,12 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
 import { Customer } from './customer.entity';
+import { OrderProduct } from './order-product.entity';
 
 @Entity('orders')
 export class Order extends BaseEntity {
@@ -36,18 +38,19 @@ export class Order extends BaseEntity {
   })
   paymentMethod: string;
 
-  @Column()
-  weight: string;
-
-  @Column()
-  customizeName: string;
-
   @ManyToOne(() => Customer, (customer) => customer.orders)
   customer: Customer;
 
-  @ManyToMany(() => Product)
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order, {
+    cascade: true,
+  })
   @JoinTable()
-  products: Product[];
+  products: Array<OrderProduct>;
+
+  @Column({
+    nullable: true,
+  })
+  totalWeight: string;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsNotEmpty,
@@ -6,7 +7,28 @@ import {
   IsPositive,
   IsString,
   Length,
+  ValidateNested,
 } from 'class-validator';
+
+export class OrderProductDto {
+  @IsNotEmpty()
+  @IsNumber()
+  id: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  cost: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsString()
+  customizeName: string;
+
+  @IsString()
+  color: string;
+}
 
 export class CreateOrderDto {
   @IsString()
@@ -29,17 +51,15 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   @IsArray()
-  public productIds: Array<number>;
+  @ValidateNested({ each: true })
+  @Type(() => OrderProductDto)
+  products: OrderProductDto[];
 
   @IsOptional()
   @IsString()
-  public customizeName: string;
-
-  @IsOptional()
-  @IsString()
-  public weight: string;
+  public totalWeight: string;
 
   @IsOptional()
   @IsNumber()
-  public quantity: number;
+  public totalProductQuantity: number;
 }

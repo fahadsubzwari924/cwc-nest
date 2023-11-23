@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
+import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 import { Order } from '../../entities/order.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { OrderService } from './services/order.service';
@@ -8,29 +10,23 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  async getAllOrders() {
+  async getAllOrders(@Query() query: PaginationAndSortingDTO) {
     try {
-      const orders = await this.orderService.getAllOrders();
-      return {
-        records: orders,
-        metadata: {
-          count: orders.length,
-        },
-      };
+      return await this.orderService.getAllOrders(query);
     } catch (error) {
       console.log(error);
     }
   }
 
   @Get(':id')
-  async getOrderById(@Param('id') id: string): Promise<Order> {
+  async getOrderById(@Param('id') id: string): Promise<ICustomResponse> {
     const order = await this.orderService.getOrderById(Number(id));
-    return order;
+    return { data: order, metadata: { orderId: Number(id) } };
   }
 
   @Post()
-  async createOrder(@Body() order: CreateOrderDto) {
+  async createOrder(@Body() order: CreateOrderDto): Promise<ICustomResponse> {
     const newOrder = await this.orderService.createOrder(order);
-    return newOrder;
+    return { data: newOrder };
   }
 }

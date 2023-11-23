@@ -1,5 +1,15 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query } from '@nestjs/common';
-import { Customer } from 'src/entities/customer.entity';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+  Logger,
+} from '@nestjs/common';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { CustomerService } from './services/customer.service';
 import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
@@ -9,6 +19,19 @@ import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSortin
 @Controller('customers')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
+
+  @Get('search')
+  async searchCustomer(@Query('searchTerm') searchTerm: string) {
+    try {
+      if (!searchTerm) {
+        return { data: [], metadata: { searchTerm } };
+      }
+      const customers = await this.customerService.searchCustomer(searchTerm);
+      return { data: customers, metadata: { searchTerm } };
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   @Get()
   async getAllCustomers(@Query() query: PaginationAndSortingDTO) {
@@ -36,15 +59,14 @@ export class CustomerController {
   @Put(':id')
   async updateCustomer(
     @Param('id') id: string,
-    @Body() customer: UpdateCustomerDto
+    @Body() customer: UpdateCustomerDto,
   ): Promise<ICustomResponse> {
-
     const updatedCustomer = await this.customerService.updateCustomer(
       Number(id),
-      customer
+      customer,
     );
 
-    return { data: updatedCustomer, metadata: { customerId: Number(id) }};
+    return { data: updatedCustomer, metadata: { customerId: Number(id) } };
   }
 
   @Delete(':id')
@@ -56,5 +78,4 @@ export class CustomerController {
     await this.customerService.deletedCustomer(id);
     return { data: true, metadata: { customerId: Number(id) } };
   }
-  
 }

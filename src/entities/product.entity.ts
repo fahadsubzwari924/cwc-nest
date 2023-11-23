@@ -3,14 +3,18 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { OrderProduct } from './order-product.entity';
 
 @Entity()
 export class Product extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index('productNameIdx')
   @Column({
     unique: true,
     length: 200,
@@ -26,10 +30,8 @@ export class Product extends BaseEntity {
   })
   cost: number;
 
-  @Column({
-    nullable: true,
-  })
-  price: number;
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
+  orders: OrderProduct[];
 
   @Column()
   weight: string;

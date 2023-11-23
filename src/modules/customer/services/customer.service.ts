@@ -6,7 +6,7 @@ import { IPaginationResponseMeta } from 'src/core/pagination/pagination-response
 import { paginateAndSort } from 'src/core/pagination/paginationAndSort.service';
 import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 import { Customer } from 'src/entities/customer.entity';
-import { Repository, FindOneOptions, DeleteResult } from 'typeorm';
+import { Repository, FindOneOptions, DeleteResult, ILike } from 'typeorm';
 
 export class CustomerService {
   constructor(
@@ -15,9 +15,14 @@ export class CustomerService {
   ) {}
 
   async getAllCustomers(
-    paginationAndSortingDto: PaginationAndSortingDTO
+    paginationAndSortingDto: PaginationAndSortingDTO,
   ): Promise<{ data: Array<Customer>; metadata: IPaginationResponseMeta }> {
-    return paginateAndSort(this.customerRepository, paginationAndSortingDto);
+    const relations = { orders: true };
+    return paginateAndSort(
+      this.customerRepository,
+      paginationAndSortingDto,
+      relations,
+    );
   }
 
   async getCustomerById(id: number): Promise<Customer> {
@@ -39,7 +44,6 @@ export class CustomerService {
   }
 
   async updateCustomer(id: number, customer: ICustomer): Promise<Customer> {
-
     const findOptions: FindOneOptions<Customer> = {
       where: { id },
     };
@@ -52,7 +56,7 @@ export class CustomerService {
 
     const updatedCustomer = plainToClass(Customer, {
       ...existingCustomer,
-      ...customer
+      ...customer,
     });
     updatedCustomer.id = id;
 
@@ -67,7 +71,6 @@ export class CustomerService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
   }
 
   async deletedCustomer(id: number): Promise<DeleteResult> {
@@ -79,4 +82,16 @@ export class CustomerService {
     return deletedCustomer;
   }
 
+  async searchCustomer(searchTerm: string): Promise<Array<Customer>> {
+    const customers = await this.customerRepository.find({
+      where: [
+        { fullName: ILike(`%${searchTerm}%`) },
+        { contactNumber: ILike(`%${searchTerm}%`) },
+      ],
+    });
+    if (!customers?.length) {
+      throw new NotFoundException('Customer not found');
+    }
+    return customers;
+  }
 }

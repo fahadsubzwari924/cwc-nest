@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/entities/product.entity';
-import { DeleteResult, FindOneOptions, In, Repository } from 'typeorm';
+import { DeleteResult, FindOneOptions, ILike, In, Repository } from 'typeorm';
 import { IProduct } from '../interfaces/product';
 import { PaginationAndSortingDTO } from '../../../core/pagination/paginationAndSorting.dto';
 import { paginateAndSort } from '../../../core/pagination/paginationAndSort.service';
@@ -86,5 +86,15 @@ export class ProductService {
     }
 
     return deletedProduct;
+  }
+
+  async searchProduct(searchTerm: string): Promise<Array<Product>> {
+    const products = await this.productRepository.find({
+      where: [{ name: ILike(`%${searchTerm}%`) }],
+    });
+    if (!products?.length) {
+      throw new NotFoundException('Products not found');
+    }
+    return products;
   }
 }

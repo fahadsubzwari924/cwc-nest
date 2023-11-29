@@ -1,9 +1,22 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+  StreamableFile,
+} from '@nestjs/common';
 import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
 import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 import { Order } from '../../entities/order.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { OrderService } from './services/order.service';
+import { UpdateOrderDto } from './dtos/update-order.dto';
+import { NoIntercept } from 'src/utils/decorators/no-intercept.decorator';
+import { Response } from 'express';
 
 @Controller('orders')
 export class OrderController {
@@ -24,9 +37,35 @@ export class OrderController {
     return { data: order, metadata: { orderId: Number(id) } };
   }
 
+  @Get(':id/pdf')
+  @NoIntercept()
+  async getOrderReceipt(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const orderReceiptBuffer = await this.orderService.generateOrderReceipt(
+      Number(id),
+    );
+    res.set('Content-Type', 'application/pdf');
+    res.set(
+      'Content-Disposition',
+      `attachment; filename="order-receipt-${id}.pdf"`,
+    );
+    res.send(orderReceiptBuffer);
+  }
+
   @Post()
   async createOrder(@Body() order: CreateOrderDto): Promise<ICustomResponse> {
     const newOrder = await this.orderService.createOrder(order);
     return { data: newOrder };
+  }
+
+  @Put(':id')
+  async updateOrder(
+    @Param('id') id: string,
+    @Body() order: UpdateOrderDto,
+  ): Promise<ICustomResponse> {
+    const updatedOrder = await this.orderService.updateOrder(Number(id), order);
+    return { data: updatedOrder, metadata: { orderId: Number(id) } };
   }
 }

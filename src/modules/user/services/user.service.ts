@@ -32,6 +32,16 @@ export class UserService {
     throw new NotFoundException('User not found');
   }
 
+  async getUser(searchCriteria: unknown): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: searchCriteria,
+    });
+    if (user) {
+      return user;
+    }
+    throw new NotFoundException('User not found');
+  }
+
   async createUser(user: IUser): Promise<User> {
     user.password = await bcrypt.hash(user.password, 10);
     const newUser = this.userRepository.create(user);

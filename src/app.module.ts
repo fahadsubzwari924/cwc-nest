@@ -9,6 +9,7 @@ import { DashboardModule } from './database/database.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { OrderModule } from './modules/order/order.module';
 import { ProductModule } from './modules/product/product.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ProductModule } from './modules/product/product.module';
     ProductModule,
     CustomerModule,
     OrderModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [

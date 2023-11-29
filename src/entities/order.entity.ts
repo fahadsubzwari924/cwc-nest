@@ -4,14 +4,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Product } from './product.entity';
 import { Customer } from './customer.entity';
 import { OrderProduct } from './order-product.entity';
+import { OrderStatus } from 'src/modules/order/enums/order-setatus.enum';
 
 @Entity('orders')
 export class Order extends BaseEntity {
@@ -51,6 +50,14 @@ export class Order extends BaseEntity {
     nullable: true,
   })
   totalWeight: string;
+
+  @Column({
+    nullable: false,
+    type: 'enum',
+    enum: OrderStatus,
+    default: OrderStatus.PENDING,
+  })
+  status: OrderStatus;
 
   @CreateDateColumn()
   createdAt: Date;

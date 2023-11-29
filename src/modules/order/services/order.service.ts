@@ -1,6 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IOrder } from 'src/core/interfaces/order.interface';
 import { IPaginationResponseMeta } from 'src/core/pagination/pagination-response-metadata.interface';
 import { paginateAndSort } from 'src/core/pagination/paginationAndSort.service';
 import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
@@ -8,10 +7,12 @@ import { Customer } from 'src/entities/customer.entity';
 import { Order } from 'src/entities/order.entity';
 import { ProductService } from 'src/modules/product/services/product.service';
 import { Repository } from 'typeorm';
-import { CreateOrderDto, OrderProductDto } from '../dtos/create-order.dto';
+import { CreateOrderDto } from '../dtos/create-order.dto';
 import { OrderProduct } from 'src/entities/order-product.entity';
 import { Product } from 'src/entities/product.entity';
 import { OrderProductSubset } from '../types/product.type';
+import { UpdateOrderDto } from '../dtos/update-order.dto';
+import * as PDFDocument from 'pdfkit';
 
 export class OrderService {
   constructor(
@@ -19,6 +20,8 @@ export class OrderService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
+    @InjectRepository(OrderProduct)
+    private readonly orderProductRepository: Repository<OrderProduct>,
     private productService: ProductService,
   ) {}
 
@@ -55,7 +58,7 @@ export class OrderService {
   }
 
   async createOrder(orderData: CreateOrderDto) {
-    const order = new Order();
+    let order = new Order();
 
     /* populating order fields */
     order.description = orderData.description;
@@ -77,31 +80,71 @@ export class OrderService {
 
     order.customer = customer;
 
-    for (const orderItemData of orderData.products) {
-      const orderProduct = new OrderProduct();
-      orderProduct.customizeName = orderItemData.customizeName;
-      orderProduct.price = orderItemData.price;
-      orderProduct.color = orderItemData.color;
+    // saving products to sync with incoming products
+    if (orderData?.products?.length) {
+      order = await this.saveProductsInOrder(order, orderData);
 
-      const product = await this.productService.getProductById(
-        Number(orderItemData.id),
-      );
-      if (!product) {
-        throw new NotFoundException(`Product not found: ${orderItemData.id}`);
+      if (!order.products?.length) {
+        throw new NotFoundException('Products not found');
       }
-      orderProduct.product = product;
-      order.products.push(orderProduct);
-    }
-
-    if (!order.products?.length) {
-      throw new NotFoundException('Products not found');
     }
 
     const newOrder = await this.orderRepository.save(order);
     return newOrder;
   }
 
-  formatOrderProducts(order: Order): Array<OrderProductSubset> {
+  async generateOrderReceipt(orderId: number): Promise<Buffer> {
+    // const order = this.getOrderById(orderId);
+
+    const pdfBuffer: Buffer = await new Promise((resolve) => {
+      const doc = new PDFDocument({
+        size: 'A4',
+        bufferPages: true,
+      });
+
+      // customize your PDF document
+      doc.text('hello world', 100, 50);
+      doc.end();
+
+      const buffer = [];
+      doc.on('data', buffer.push.bind(buffer));
+      doc.on('end', () => {
+        const data = Buffer.concat(buffer);
+        resolve(data);
+      });
+    });
+
+    return pdfBuffer;
+  }
+
+  async updateOrder(
+    orderId: number,
+    updateOrderPayload: UpdateOrderDto,
+  ): Promise<Order> {
+    let order = await this.getOrderById(orderId);
+
+    // updating order fields
+    order = this.updateOrderRelatedFieldsOnly(order, updateOrderPayload);
+
+    // saving products to sync with incoming products
+    if (updateOrderPayload?.products?.length) {
+      // removing products
+      await this.orderProductRepository.remove(order.products);
+
+      order = await this.saveProductsInOrder(order, updateOrderPayload);
+
+      if (!order.products?.length) {
+        throw new NotFoundException('Products not found');
+      }
+    }
+
+    // Save the updated order
+    const updatedOrder = await this.orderRepository.save(order);
+
+    return updatedOrder;
+  }
+
+  private formatOrderProducts(order: Order): Array<OrderProductSubset> {
     return order.products.map((orderProduct: OrderProduct & Product) => ({
       id: orderProduct?.product?.id,
       name: orderProduct?.product?.name,
@@ -112,5 +155,44 @@ export class OrderService {
       color: orderProduct.color,
       createdAt: orderProduct.createdAt,
     }));
+  }
+
+  private updateOrderRelatedFieldsOnly(
+    order: Order,
+    updateOrderPayload: UpdateOrderDto,
+  ): Order {
+    order.description = updateOrderPayload.description || order.description;
+    order.amount = updateOrderPayload.amount || order.amount;
+    order.quantity = updateOrderPayload.totalProductQuantity || order.quantity;
+    order.paymentMethod =
+      updateOrderPayload.paymentMethod || order.paymentMethod;
+    order.totalWeight = updateOrderPayload.totalWeight || order.totalWeight;
+    order.status = updateOrderPayload.status || order.status;
+
+    return order;
+  }
+
+  private async saveProductsInOrder(
+    order: Order,
+    updateOrderPayload: UpdateOrderDto | CreateOrderDto,
+  ): Promise<Order> {
+    for (const orderProductData of updateOrderPayload.products) {
+      const orderProduct = new OrderProduct();
+      orderProduct.customizeName = orderProductData.customizeName;
+      orderProduct.price = orderProductData.price;
+      orderProduct.color = orderProductData.color;
+
+      const product = await this.productService.getProductById(
+        Number(orderProductData.id),
+      );
+      if (!product) {
+        throw new NotFoundException(
+          `Product not found: ${orderProductData.id}`,
+        );
+      }
+      orderProduct.product = product;
+      order.products.push(orderProduct);
+    }
+    return order;
   }
 }

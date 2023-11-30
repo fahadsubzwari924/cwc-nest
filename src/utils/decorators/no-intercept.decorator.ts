@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
 
-export const NO_INTERCEPT_METADATA_KEY = 'no-intercept';
+export const IS_PUBLIC_KEY = 'isPublic';
 
-export const NoIntercept = () => SetMetadata(NO_INTERCEPT_METADATA_KEY, true);
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);

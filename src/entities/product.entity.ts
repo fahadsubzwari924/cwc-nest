@@ -36,6 +36,11 @@ export class Product extends BaseEntity {
   @Column()
   weight: string;
 
+  @Column({
+    nullable: true,
+  })
+  thumbnailImage: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }

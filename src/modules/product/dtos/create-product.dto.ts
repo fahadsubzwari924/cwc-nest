@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   IsNumber,
@@ -24,10 +25,16 @@ export class CreateProductDto {
   @IsNumber()
   @IsNotEmpty()
   @IsPositive()
+  @Transform(({ value }) => parseInt(value))
   public cost: number;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
   public weight: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  public thumbnailImage: string;
 }

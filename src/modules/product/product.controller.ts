@@ -8,16 +8,24 @@ import {
   Query,
   Delete,
   NotFoundException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { ProductService } from './services/product.service';
 import { PaginationAndSortingDTO } from '../../core/pagination/paginationAndSorting.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
 import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesService } from '../file/services/file.service';
+import { UploadApiOptions } from 'cloudinary';
 
 @Controller('products')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly fileService: FilesService,
+  ) {}
 
   @Get('search')
   async searchProducts(@Query('searchTerm') searchTerm: string) {
@@ -48,9 +56,29 @@ export class ProductController {
   }
 
   @Post()
+  @UseInterceptors(FileInterceptor('thumbnailImage'))
   async createProduct(
+    @UploadedFile() thumbnailImage: Express.Multer.File,
     @Body() product: CreateProductDto,
   ): Promise<ICustomResponse> {
+    const isProductExists = await this.productService.isProductExists(
+      product.name,
+    );
+
+    if (isProductExists) {
+      throw new Error(`Product already exists with name : ${product.name}`);
+    }
+    const uploadOptions: UploadApiOptions = {
+      folder: 'product-thumbnails',
+    };
+
+    /* uploading file to cloud and saving url to product object */
+    const uploadProductThumbnailResponse = await this.fileService.uploadFile(
+      thumbnailImage,
+      uploadOptions,
+    );
+    product.thumbnailImage = uploadProductThumbnailResponse.url;
+
     const newProduct = await this.productService.createProduct(product);
     return { data: newProduct };
   }

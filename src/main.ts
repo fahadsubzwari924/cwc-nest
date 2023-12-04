@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { CustomExceptionFilter } from './core/filters/exception.filter';
+import { AuthGuard } from './modules/auth/guards/auth.guard';
+import { AuthModule } from './modules/auth/auth.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,6 +28,11 @@ async function bootstrap() {
 
   app.useGlobalFilters(new CustomExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  // Import AuthModule and apply global authentication guard
+  const authModule = app.select(AuthModule);
+  app.useGlobalGuards(authModule.get(AuthGuard));
+
   await app.listen(3000);
 }
 bootstrap();

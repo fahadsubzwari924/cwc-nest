@@ -15,7 +15,7 @@ import { Order } from '../../entities/order.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { OrderService } from './services/order.service';
 import { UpdateOrderDto } from './dtos/update-order.dto';
-import { NoIntercept } from 'src/utils/decorators/no-intercept.decorator';
+import { Public } from 'src/utils/decorators/no-intercept.decorator';
 import { Response } from 'express';
 
 @Controller('orders')
@@ -38,7 +38,7 @@ export class OrderController {
   }
 
   @Get(':id/pdf')
-  @NoIntercept()
+  @Public()
   async getOrderReceipt(
     @Param('id') id: string,
     @Res() res: Response,

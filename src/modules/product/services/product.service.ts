@@ -97,4 +97,11 @@ export class ProductService {
     }
     return products;
   }
+
+  async isProductExists(name: string): Promise<boolean> {
+    const product = await this.productRepository.findOne({
+      where: { name },
+    });
+    return !!product;
+  }
 }

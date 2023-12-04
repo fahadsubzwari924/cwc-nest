@@ -3,6 +3,7 @@ import { ICustomResponse } from 'src/core/interfaces/controller-response.interfa
 import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UserService } from './services/user.service';
+import { Public } from 'src/utils/decorators/no-intercept.decorator';
 
 @Controller('users')
 export class UserController {
@@ -23,6 +24,7 @@ export class UserController {
     return { data: user, metadata: { userId: Number(id) } };
   }
 
+  @Public()
   @Post()
   async createUser(@Body() user: CreateUserDto): Promise<ICustomResponse> {
     const newUser = await this.userService.createUser(user);

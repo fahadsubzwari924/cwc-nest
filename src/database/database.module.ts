@@ -17,6 +17,12 @@ import { User, Product, Customer, Order, OrderProduct } from '../entities';
         database: configService.get('PG_DATABASE'),
         entities: [Product, Customer, Order, OrderProduct, User],
         synchronize: true,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+        extra: {
+          sslmode: 'require',
+        },
       }),
     }),
   ],

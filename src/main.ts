@@ -5,11 +5,15 @@ import { AppModule } from './app.module';
 import { CustomExceptionFilter } from './core/filters/exception.filter';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { AuthModule } from './modules/auth/auth.module';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'warn'],
   });
+
+  const configService = app.get(ConfigService);
+  const PORT = configService.get<number>('PORT') || 3000;
 
   app.enableCors();
 
@@ -33,6 +37,6 @@ async function bootstrap() {
   const authModule = app.select(AuthModule);
   app.useGlobalGuards(authModule.get(AuthGuard));
 
-  await app.listen(3000);
+  await app.listen(PORT);
 }
 bootstrap();

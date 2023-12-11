@@ -84,10 +84,25 @@ export class ProductController {
   }
 
   @Put(':id')
+  @UseInterceptors(FileInterceptor('thumbnailImage'))
   async updateProduct(
     @Param('id') id: string,
+    @UploadedFile() thumbnailImage: Express.Multer.File,
     @Body() product: UpdateProductDto,
   ): Promise<ICustomResponse> {
+    await this.productService.getProductById(Number(id));
+
+    const uploadOptions: UploadApiOptions = {
+      folder: 'product-thumbnails',
+    };
+
+    /* uploading file to cloud and saving url to product object */
+    const uploadProductThumbnailResponse = await this.fileService.uploadFile(
+      thumbnailImage,
+      uploadOptions,
+    );
+    product.thumbnailImage = uploadProductThumbnailResponse.url;
+
     const newProduct = await this.productService.updateProduct(
       Number(id),
       product,

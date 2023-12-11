@@ -6,11 +6,15 @@ import { CustomExceptionFilter } from './core/filters/exception.filter';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigService } from '@nestjs/config';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'warn'],
   });
+
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
   const configService = app.get(ConfigService);
   const PORT = configService.get<number>('PORT') || 3000;

@@ -41,7 +41,7 @@ export class Order extends BaseEntity {
   customer: Customer;
 
   @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order, {
-    cascade: true,
+    cascade: ['insert', 'update', 'remove'],
   })
   @JoinTable()
   products: Array<OrderProduct>;

@@ -23,6 +23,10 @@ export class OrderProductDto {
   @IsNumber()
   price: number;
 
+  @IsNotEmpty()
+  @IsNumber()
+  quantity: number;
+
   @IsString()
   customizeName: string;
 

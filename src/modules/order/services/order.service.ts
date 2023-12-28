@@ -7,7 +7,7 @@ import { Customer } from 'src/entities/customer.entity';
 import { Order } from 'src/entities/order.entity';
 import { ProductService } from 'src/modules/product/services/product.service';
 import { Repository } from 'typeorm';
-import { CreateOrderDto } from '../dtos/create-order.dto';
+import { CreateOrderDto, OrderProductDto } from '../dtos/create-order.dto';
 import { OrderProduct } from 'src/entities/order-product.entity';
 import { Product } from 'src/entities/product.entity';
 import { OrderProductSubset } from '../types/product.type';
@@ -44,7 +44,7 @@ export class OrderService {
     return { data: transformedOrder, metadata: orders.metadata };
   }
 
-  async getOrderById(id: number): Promise<Order> {
+  async getOrderById(id: number): Promise<any> {
     const order = await this.orderRepository.findOne({
       where: {
         id: id,
@@ -52,7 +52,11 @@ export class OrderService {
       relations: { customer: true, products: true },
     });
     if (order) {
-      return order;
+      const formattedOrder = {
+        ...order,
+        products: this.formatOrderProducts(order),
+      };
+      return formattedOrder;
     }
     throw new NotFoundException('Could not find the order');
   }
@@ -82,7 +86,7 @@ export class OrderService {
 
     // saving products to sync with incoming products
     if (orderData?.products?.length) {
-      order = await this.saveProductsInOrder(order, orderData);
+      order = await this.saveProductsInOrder(order, orderData.products);
 
       if (!order.products?.length) {
         throw new NotFoundException('Products not found');
@@ -129,9 +133,11 @@ export class OrderService {
     // saving products to sync with incoming products
     if (updateOrderPayload?.products?.length) {
       // removing products
-      await this.orderProductRepository.remove(order.products);
-
-      order = await this.saveProductsInOrder(order, updateOrderPayload);
+      await this.orderProductRepository.clear();
+      order = await this.saveProductsInOrder(
+        order,
+        updateOrderPayload.products,
+      );
 
       if (!order.products?.length) {
         throw new NotFoundException('Products not found');
@@ -144,6 +150,25 @@ export class OrderService {
     return updatedOrder;
   }
 
+  async deleteOrder(orderId: number): Promise<boolean> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['products'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order not found: ${orderId}`);
+    }
+
+    // Remove associated products
+    await this.orderProductRepository.remove(order.products);
+
+    // Remove the order itself
+    await this.orderRepository.remove(order);
+
+    return true;
+  }
+
   private formatOrderProducts(order: Order): Array<OrderProductSubset> {
     return order.products.map((orderProduct: OrderProduct & Product) => ({
       id: orderProduct?.product?.id,
@@ -153,6 +178,7 @@ export class OrderService {
       weight: orderProduct?.product?.weight,
       customizeName: orderProduct.customizeName,
       color: orderProduct.color,
+      quantity: orderProduct.quantity,
       createdAt: orderProduct.createdAt,
     }));
   }
@@ -174,13 +200,15 @@ export class OrderService {
 
   private async saveProductsInOrder(
     order: Order,
-    updateOrderPayload: UpdateOrderDto | CreateOrderDto,
+    orderProducts: Array<OrderProductDto>,
   ): Promise<Order> {
-    for (const orderProductData of updateOrderPayload.products) {
+    order.products = [];
+    for (const orderProductData of orderProducts) {
       const orderProduct = new OrderProduct();
       orderProduct.customizeName = orderProductData.customizeName;
       orderProduct.price = orderProductData.price;
       orderProduct.color = orderProductData.color;
+      orderProduct.quantity = orderProductData.quantity;
 
       const product = await this.productService.getProductById(
         Number(orderProductData.id),

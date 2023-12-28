@@ -15,11 +15,16 @@ export class OrderProduct extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Order, (order) => order.products)
+  @ManyToOne(() => Order, (order) => order.products, {
+    cascade: ['insert', 'update'],
+  })
   @JoinColumn()
   order: Order;
 
-  @ManyToOne(() => Product, (product) => product.orders, { eager: true })
+  @ManyToOne(() => Product, (product) => product.orders, {
+    eager: true,
+    cascade: true,
+  })
   @JoinColumn()
   product: Product;
 
@@ -27,6 +32,11 @@ export class OrderProduct extends BaseEntity {
     nullable: false,
   })
   price: number;
+
+  @Column({
+    nullable: true,
+  })
+  quantity: number;
 
   @Column({ nullable: true })
   customizeName: string;

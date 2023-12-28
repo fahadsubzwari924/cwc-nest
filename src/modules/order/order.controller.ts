@@ -1,17 +1,16 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
   Put,
   Query,
   Res,
-  StreamableFile,
 } from '@nestjs/common';
 import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
 import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
-import { Order } from '../../entities/order.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { OrderService } from './services/order.service';
 import { UpdateOrderDto } from './dtos/update-order.dto';
@@ -67,5 +66,15 @@ export class OrderController {
   ): Promise<ICustomResponse> {
     const updatedOrder = await this.orderService.updateOrder(Number(id), order);
     return { data: updatedOrder, metadata: { orderId: Number(id) } };
+  }
+
+  @Delete(':id')
+  async deleteOrder(@Param('id') id: string): Promise<ICustomResponse> {
+    try {
+      const deleteOrder = await this.orderService.deleteOrder(Number(id));
+      return { data: !!deleteOrder, metadata: { orderId: Number(id) } };
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

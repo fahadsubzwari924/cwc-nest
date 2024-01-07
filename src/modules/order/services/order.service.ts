@@ -70,6 +70,7 @@ export class OrderService {
     order.quantity = orderData.totalProductQuantity;
     order.paymentMethod = orderData.paymentMethod;
     order.totalWeight = orderData.totalWeight;
+    order.orderDate = orderData.orderDate;
     order.products = [];
     /* fetching customer */
     const customer = await this.customerRepository.findOne({
@@ -194,6 +195,7 @@ export class OrderService {
       updateOrderPayload.paymentMethod || order.paymentMethod;
     order.totalWeight = updateOrderPayload.totalWeight || order.totalWeight;
     order.status = updateOrderPayload.status || order.status;
+    order.orderDate = updateOrderPayload.orderDate || order.orderDate;
 
     return order;
   }

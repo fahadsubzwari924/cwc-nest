@@ -66,4 +66,8 @@ export class CreateOrderDto {
   @IsOptional()
   @IsNumber()
   public totalProductQuantity: number;
+
+  @IsNotEmpty()
+  @IsString()
+  public orderDate: Date;
 }

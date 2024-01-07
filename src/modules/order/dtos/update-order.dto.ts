@@ -55,4 +55,9 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsEnum(OrderStatus, { message: 'Invalud order status type' })
   public status: OrderStatus;
+
+  @IsOptional()
+  @IsString()
+  public orderDate: Date;
+
 }

@@ -62,8 +62,10 @@ export class ReportService {
     const totalRepeatCustomers =
       Number(totalRepeatCustomersCount['totalRepeatCustomers']) ?? 0;
 
-    const repeatedCustomerPercentage =
-      `${(totalRepeatCustomers / totalCustomers) * 100}%`;
+    const repeatedCustomerPercentage = `${(
+      (totalRepeatCustomers / totalCustomers) *
+      100
+    ).toFixed(2)} %`;
 
     const stats: IDashboardStats = {
       totalCustomers,

@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsDate,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -57,7 +56,7 @@ export class UpdateOrderDto {
   @IsEnum(OrderStatus, { message: 'Invalud order status type' })
   public status: OrderStatus;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   public orderDate: Date;
 

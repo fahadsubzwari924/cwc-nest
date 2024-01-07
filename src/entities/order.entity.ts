@@ -61,6 +61,13 @@ export class Order extends BaseEntity {
   })
   status: OrderStatus;
 
+  @Column({
+    nullable: false,
+    default: new Date()
+  })
+  orderDate: Date;
+
+
   @CreateDateColumn()
   createdAt: Date;
 }

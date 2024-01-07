@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsDate,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -66,4 +67,8 @@ export class CreateOrderDto {
   @IsOptional()
   @IsNumber()
   public totalProductQuantity: number;
+
+  @IsNotEmpty()
+  @IsString()
+  public orderDate: Date;
 }

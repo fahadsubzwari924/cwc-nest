@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   JoinTable,
   ManyToOne,
@@ -40,6 +41,7 @@ export class Order extends BaseEntity {
 
   @ManyToOne(() => Customer, (customer) => customer.orders) 
   @JoinColumn({ name: 'customerId' })
+  @Index()
   customer: Customer;
 
   @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order, {

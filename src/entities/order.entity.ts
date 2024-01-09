@@ -41,7 +41,7 @@ export class Order extends BaseEntity {
 
   @ManyToOne(() => Customer, (customer) => customer.orders) 
   @JoinColumn({ name: 'customerId' })
-  @Index('customerOrderIdx')
+  @Index()
   customer: Customer;
 
   @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order, {

@@ -45,27 +45,17 @@ export class ReportService {
 
     const queryBuilder = this.dataSource.createQueryBuilder();
 
-    const subQuery = queryBuilder
-      .subQuery()
-      .select('COUNT(o.customerId)', 'repeatCustomerCount')
+    const repeatCustomerCount = await queryBuilder
+      .select('COUNT(DISTINCT customer.id)', 'repeatCustomerCount')
       .from(Order, 'o')
       .innerJoin('o.customer', 'customer')
-      .groupBy('o.customerId')
-      .having('COUNT(customer.id) > 1');
+      .groupBy('customer.id')
+      .having('COUNT(o.id) > 1')
+      .getRawOne();
 
-    const totalRepeatCustomersQuery = queryBuilder
-      .select('COUNT(*)', 'totalRepeatCustomers')
-      .from(() => subQuery, 'sub');
-
-    const totalRepeatCustomersCount =
-      await totalRepeatCustomersQuery.getRawOne();
-    const totalRepeatCustomers =
-      Number(totalRepeatCustomersCount['totalRepeatCustomers']) ?? 0;
-
-    const repeatedCustomerPercentage = `${(
-      (totalRepeatCustomers / totalCustomers) *
-      100
-    ).toFixed(2)} %`;
+    const repeatedCustomerPercentage =
+      (Number(repeatCustomerCount?.repeatCustomerCount ?? 0) / totalCustomers) *
+      100;
 
     const stats: IDashboardStats = {
       totalCustomers,
@@ -74,7 +64,7 @@ export class ReportService {
       totalPendingOrders,
       totalDispatchedOrders,
       totalDeliveredOrders,
-      repeatedCustomerPercentage,
+      repeatedCustomerPercentage: `${repeatedCustomerPercentage.toFixed(2)}%`,
     };
 
     return stats;

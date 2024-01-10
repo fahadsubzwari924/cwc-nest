@@ -46,14 +46,16 @@ export class ReportService {
     const queryBuilder = this.dataSource.createQueryBuilder();
 
     const repeatCustomerCount = await queryBuilder
-      .select('COUNT(DISTINCT o.customerId)')
+      .select('COUNT(DISTINCT customer.id)', 'repeatCustomerCount')
       .from(Order, 'o')
       .innerJoin('o.customer', 'customer')
-      .having('COUNT(o.id) > 1') // Count orders per customer directly
+      .groupBy('customer.id')
+      .having('COUNT(o.id) > 1')
       .getRawOne();
 
     const repeatedCustomerPercentage =
-      (Number(repeatCustomerCount['count'] ?? 0) / totalCustomers) * 100;
+      (Number(repeatCustomerCount?.repeatCustomerCount ?? 0) / totalCustomers) *
+      100;
 
     const stats: IDashboardStats = {
       totalCustomers,

@@ -64,7 +64,9 @@ export class ReportService {
       totalPendingOrders,
       totalDispatchedOrders,
       totalDeliveredOrders,
-      repeatedCustomerPercentage: `${repeatedCustomerPercentage.toFixed(2)}%`,
+      repeatedCustomerPercentage: repeatedCustomerPercentage
+        ? `${repeatedCustomerPercentage.toFixed(2)}%`
+        : '0%',
     };
 
     return stats;

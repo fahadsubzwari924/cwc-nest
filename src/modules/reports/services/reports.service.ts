@@ -43,6 +43,11 @@ export class ReportService {
       .where('order.status = :status', { status: OrderStatus.DELIVERED })
       .getCount();
 
+    const totalReturnedOrders = await this.orderRespository
+      .createQueryBuilder('order')
+      .where('order.status = :status', { status: OrderStatus.RETURNED })
+      .getCount();
+
     const queryBuilder = this.dataSource.createQueryBuilder();
 
     const repeatCustomerCount = await queryBuilder
@@ -64,6 +69,7 @@ export class ReportService {
       totalPendingOrders,
       totalDispatchedOrders,
       totalDeliveredOrders,
+      totalReturnedOrders,
       repeatedCustomerPercentage: `${repeatedCustomerPercentage.toFixed(2)}%`,
     };
 

@@ -5,5 +5,6 @@ export interface IDashboardStats {
   totalPendingOrders: number;
   totalDispatchedOrders: number;
   totalDeliveredOrders: number;
+  totalReturnedOrders: number;
   repeatedCustomerPercentage: string;
 }

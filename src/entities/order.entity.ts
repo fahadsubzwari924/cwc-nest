@@ -39,7 +39,7 @@ export class Order extends BaseEntity {
   })
   paymentMethod: string;
 
-  @ManyToOne(() => Customer, (customer) => customer.orders) 
+  @ManyToOne(() => Customer, (customer) => customer.orders)
   @JoinColumn({ name: 'customerId' })
   @Index()
   customer: Customer;
@@ -65,10 +65,9 @@ export class Order extends BaseEntity {
 
   @Column({
     nullable: false,
-    default: new Date()
+    default: new Date(),
   })
   orderDate: Date;
-
 
   @CreateDateColumn()
   createdAt: Date;

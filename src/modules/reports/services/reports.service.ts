@@ -14,8 +14,6 @@ export class ReportService {
   ) {}
 
   async getDashboardStats(): Promise<IDashboardStats> {
-    // total customer, products, orders
-    // pending, dispatched, delivered orders
     const totalCustomers = await this.customerRepository
       .createQueryBuilder()
       .getCount();
@@ -51,13 +49,19 @@ export class ReportService {
     const queryBuilder = this.dataSource.createQueryBuilder();
 
     const repeatCustomerCount = await queryBuilder
-      .select('COUNT(DISTINCT customer.id)', 'repeatCustomerCount')
-      .from(Order, 'o')
-      .innerJoin('o.customer', 'customer')
-      .groupBy('customer.id')
-      .having('COUNT(o.id) > 1')
+      .select('COUNT(*)', 'repeatCustomerCount')
+      .from(
+        (subquery) =>
+          subquery
+            .select('customer.id')
+            .distinct(true)
+            .from(Order, 'o')
+            .innerJoin('o.customer', 'customer')
+            .groupBy('customer.id')
+            .having('COUNT(o.id) > 1'),
+        'subquery',
+      )
       .getRawOne();
-
     const repeatedCustomerPercentage =
       (Number(repeatCustomerCount?.repeatCustomerCount ?? 0) / totalCustomers) *
       100;

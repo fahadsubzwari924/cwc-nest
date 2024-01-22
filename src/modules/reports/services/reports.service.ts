@@ -1,5 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { IDashboardStats } from 'src/core/interfaces/dashboard-stats.interface';
+import { IOrderBYCity } from 'src/core/interfaces/orders-by-city.interface';
 import { Customer, Order, Product } from 'src/entities';
 import { OrderStatus } from 'src/modules/order/enums/order-setatus.enum';
 import { Repository, DataSource } from 'typeorm';
@@ -78,5 +79,38 @@ export class ReportService {
     };
 
     return stats;
+  }
+
+  async getOrderByCities(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<IOrderBYCity[]> {
+    try {
+      const totalCount = await this.orderRespository.count();
+
+      const queryBuilder = this.orderRespository
+        .createQueryBuilder('o')
+        .innerJoinAndSelect('o.customer', 'cs')
+        .select(['COUNT(o.id), cs.city'])
+        .where(`o.orderDate BETWEEN '${startDate}' AND '${endDate}'`)
+        .groupBy('cs.city');
+      const results = await queryBuilder.getRawMany();
+
+      if (!results?.length) {
+        return [];
+      }
+
+      const cityPercentages: IOrderBYCity[] = results.map((x) => {
+        return {
+          percentage: `${(((x?.count ?? 0) / (totalCount ?? 0)) * 100).toFixed(
+            2,
+          )}%`,
+          city: x.city,
+        };
+      });
+      return cityPercentages;
+    } catch (error) {
+      throw error;
+    }
   }
 }

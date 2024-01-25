@@ -10,19 +10,19 @@ import {
   Res,
 } from '@nestjs/common';
 import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
-import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { OrderService } from './services/order.service';
 import { UpdateOrderDto } from './dtos/update-order.dto';
 import { Public } from 'src/utils/decorators/no-intercept.decorator';
 import { Response } from 'express';
+import { OrderPaginationAndSortingDTO } from 'src/core/pagination/orderPaginationAndSorting.dto';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  async getAllOrders(@Query() query: PaginationAndSortingDTO) {
+  async getAllOrders(@Query() query: OrderPaginationAndSortingDTO) {
     try {
       return await this.orderService.getAllOrders(query);
     } catch (error) {

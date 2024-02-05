@@ -1,32 +1,34 @@
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { createErrorResponse, createResponse } from 'src/utils/response.utils';
 import { GenericResponseDto } from '../dtos/generic-response.dto';
-
+import { ValidationCodes } from 'src/utils/constants/validation-codes.constant';
 @Catch()
 export class CustomExceptionFilter implements ExceptionFilter {
   private readonly logger: Logger;
   catch(exception: Error, host: ArgumentsHost): any {
-    console.log('--Exception--', exception['detail']);
-    console.log('exception: ', exception);
+    console.log('------------ Exception ------------');
     const ctx = host.switchToHttp();
     const request = ctx.getRequest();
     const response = ctx.getResponse();
+
+    let error = [ValidationCodes.general.somethingWentWrong];
+    if (exception instanceof BadRequestException) {
+      if (exception['response']['message'] instanceof Array) {
+        error = exception['response']['message'] || exception.message['error'];
+      }
+    }
 
     const statusCode =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
-    const message =
-      exception instanceof HttpException
-        ? exception['response']['message'] || exception.message['error']
-        : exception['detail'];
 
     const devErrorResponse: any = {
       statusCode,
@@ -34,15 +36,13 @@ export class CustomExceptionFilter implements ExceptionFilter {
       path: request.url,
       method: request.method,
       errorName: exception?.name,
-      message: exception?.message,
+      exception,
     };
 
     console.log(
       `request method: ${request.method} request url${request.url}`,
       JSON.stringify(devErrorResponse),
     );
-    response
-      .status(statusCode)
-      .json(new GenericResponseDto({ error: exception?.message }));
+    response.status(statusCode).json(new GenericResponseDto({ error }));
   }
 }

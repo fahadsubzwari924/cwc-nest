@@ -7,7 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { OrderProduct } from './order-product.entity';
+import { OrderItem } from './order-item.entity';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -30,8 +30,8 @@ export class Product extends BaseEntity {
   })
   cost: number;
 
-  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
-  orders: OrderProduct[];
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
+  orderItems: OrderItem[];
 
   @Column()
   weight: string;

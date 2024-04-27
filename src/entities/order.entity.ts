@@ -5,14 +5,13 @@ import {
   Entity,
   Index,
   JoinColumn,
-  JoinTable,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Customer } from './customer.entity';
-import { OrderProduct } from './order-product.entity';
 import { OrderStatus } from 'src/modules/order/enums/order-setatus.enum';
+import { OrderItem } from './order-item.entity';
 
 @Entity('orders')
 export class Order extends BaseEntity {
@@ -44,11 +43,8 @@ export class Order extends BaseEntity {
   @Index()
   customer: Customer;
 
-  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order, {
-    cascade: ['insert', 'update', 'remove'],
-  })
-  @JoinTable()
-  products: Array<OrderProduct>;
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
+  orderItems: OrderItem[];
 
   @Column({
     nullable: true,

@@ -34,6 +34,26 @@ export class OrderProductDto {
   color: string;
 }
 
+export class OrderItemDto {
+  @IsNotEmpty()
+  @IsNumber()
+  productId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  quantity: number;
+
+  @IsString()
+  customizeName: string;
+
+  @IsString()
+  color: string;
+}
+
 export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
@@ -56,8 +76,8 @@ export class CreateOrderDto {
   @IsNotEmpty()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => OrderProductDto)
-  products: OrderProductDto[];
+  @Type(() => OrderItemDto)
+  orderItems: OrderItemDto[];
 
   @IsOptional()
   @IsString()

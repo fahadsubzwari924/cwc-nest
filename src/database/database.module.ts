@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User, Product, Customer, Order, OrderProduct } from '../entities';
+import { User, Product, Customer, Order, OrderItem } from '../entities';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { User, Product, Customer, Order, OrderProduct } from '../entities';
         username: configService.get('PG_USERNAME'),
         password: configService.get('PG_PASSWORD'),
         database: configService.get('PG_DATABASE'),
-        entities: [Product, Customer, Order, OrderProduct, User],
+        entities: [Product, Customer, Order, User, OrderItem],
         synchronize: true,
         ssl: {
           rejectUnauthorized: false,

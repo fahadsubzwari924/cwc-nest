@@ -7,12 +7,12 @@ import { Customer } from 'src/entities/customer.entity';
 import { Order } from 'src/entities/order.entity';
 import { ProductService } from 'src/modules/product/services/product.service';
 import { Repository } from 'typeorm';
-import { CreateOrderDto, OrderProductDto } from '../dtos/create-order.dto';
-import { OrderProduct } from 'src/entities/order-product.entity';
+import { CreateOrderDto, OrderItemDto } from '../dtos/create-order.dto';
 import { Product } from 'src/entities/product.entity';
 import { OrderProductSubset } from '../types/product.type';
 import { UpdateOrderDto } from '../dtos/update-order.dto';
 import * as PDFDocument from 'pdfkit';
+import { OrderItem } from 'src/entities';
 
 export class OrderService {
   constructor(
@@ -20,21 +20,20 @@ export class OrderService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
-    @InjectRepository(OrderProduct)
-    private readonly orderProductRepository: Repository<OrderProduct>,
+    @InjectRepository(OrderItem)
+    private readonly orderItemRepository: Repository<OrderItem>,
     private productService: ProductService,
   ) {}
 
   async getAllOrders(
     paginationAndSortingDto: PaginationAndSortingDTO,
   ): Promise<{ data: Array<Order>; metadata: IPaginationResponseMeta }> {
-    const relations = { customer: true, products: true };
+    const relations = ['customer', 'orderItems', 'orderItems.product'];
     const orders: any = await paginateAndSort(
       this.orderRepository,
       paginationAndSortingDto,
       relations,
     );
-
     const transformedOrder = orders.data.map((order: Order) => {
       return {
         ...order,
@@ -49,8 +48,9 @@ export class OrderService {
       where: {
         id: id,
       },
-      relations: { customer: true, products: true },
+      relations: ['customer', 'orderItems', 'orderItems.product'],
     });
+
     if (order) {
       const formattedOrder = {
         ...order,
@@ -62,16 +62,16 @@ export class OrderService {
   }
 
   async createOrder(orderData: CreateOrderDto) {
-    let order = new Order();
+    const orderToSave = new Order();
 
     /* populating order fields */
-    order.description = orderData.description;
-    order.amount = orderData.amount;
-    order.quantity = orderData.totalProductQuantity;
-    order.paymentMethod = orderData.paymentMethod;
-    order.totalWeight = orderData.totalWeight;
-    order.orderDate = orderData.orderDate;
-    order.products = [];
+    orderToSave.description = orderData.description;
+    orderToSave.amount = orderData.amount;
+    orderToSave.quantity = orderData.totalProductQuantity;
+    orderToSave.paymentMethod = orderData.paymentMethod;
+    orderToSave.totalWeight = orderData.totalWeight;
+    orderToSave.orderDate = orderData.orderDate;
+    orderToSave.orderItems = [];
     /* fetching customer */
     const customer = await this.customerRepository.findOne({
       where: { id: orderData.customerId },
@@ -83,19 +83,17 @@ export class OrderService {
       );
     }
 
-    order.customer = customer;
+    orderToSave.customer = customer;
+
+    const newOrder = await this.orderRepository.save(orderToSave);
 
     // saving products to sync with incoming products
-    if (orderData?.products?.length) {
-      order = await this.saveProductsInOrder(order, orderData.products);
-
-      if (!order.products?.length) {
-        throw new NotFoundException('Products not found');
-      }
+    if (orderData?.orderItems?.length) {
+      await this.saveProductsInOrder(newOrder, orderData.orderItems);
     }
 
-    const newOrder = await this.orderRepository.save(order);
-    return newOrder;
+    const createdOrder = await this.getOrderById(newOrder.id);
+    return createdOrder;
   }
 
   async generateOrderReceipt(orderId: number): Promise<Buffer> {
@@ -126,28 +124,36 @@ export class OrderService {
     orderId: number,
     updateOrderPayload: UpdateOrderDto,
   ): Promise<Order> {
-    let order = await this.getOrderById(orderId);
+    const order: Order = await this.getOrderById(orderId);
 
-    // updating order fields
-    order = this.updateOrderRelatedFieldsOnly(order, updateOrderPayload);
-
-    // saving products to sync with incoming products
-    if (updateOrderPayload?.products?.length) {
-      // removing products
-      await this.orderProductRepository.clear();
-      order = await this.saveProductsInOrder(
-        order,
-        updateOrderPayload.products,
-      );
-
-      if (!order.products?.length) {
-        throw new NotFoundException('Products not found');
-      }
+    if (!order) {
+      throw new NotFoundException(`Order with id ${orderId} not found`);
     }
 
-    // Save the updated order
-    const updatedOrder = await this.orderRepository.save(order);
+    // Update order fields
 
+    order.description = updateOrderPayload.description || order.description;
+    order.amount = updateOrderPayload.amount || order.amount;
+    order.quantity = updateOrderPayload.totalProductQuantity || order.quantity;
+    order.paymentMethod =
+      updateOrderPayload.paymentMethod || order.paymentMethod;
+    order.totalWeight = updateOrderPayload.totalWeight || order.totalWeight;
+    order.status = updateOrderPayload.status || order.status;
+    order.orderDate = updateOrderPayload.orderDate || order.orderDate;
+
+    const orderAfterUpdate = await this.orderRepository.save(order);
+
+    // Update order products
+    if (updateOrderPayload.orderItems?.length) {
+      await this.orderItemRepository.remove(order.orderItems);
+
+      await this.saveProductsInOrder(
+        orderAfterUpdate,
+        updateOrderPayload.orderItems,
+      );
+    }
+
+    const updatedOrder = await this.getOrderById(order.id);
     return updatedOrder;
   }
 
@@ -162,7 +168,7 @@ export class OrderService {
     }
 
     // Remove associated products
-    await this.orderProductRepository.remove(order.products);
+    await this.orderItemRepository.remove(order.orderItems);
 
     // Remove the order itself
     await this.orderRepository.remove(order);
@@ -171,58 +177,43 @@ export class OrderService {
   }
 
   private formatOrderProducts(order: Order): Array<OrderProductSubset> {
-    return order.products.map((orderProduct: OrderProduct & Product) => ({
-      id: orderProduct?.product?.id,
-      name: orderProduct?.product?.name,
-      cost: orderProduct?.product?.cost,
-      price: orderProduct.price,
-      weight: orderProduct?.product?.weight,
-      customizeName: orderProduct.customizeName,
-      color: orderProduct.color,
-      quantity: orderProduct.quantity,
-      createdAt: orderProduct.createdAt,
+    return order.orderItems.map((orderItem: OrderItem & Product) => ({
+      id: orderItem?.product?.id,
+      name: orderItem?.product?.name,
+      cost: orderItem?.product?.cost,
+      price: orderItem.price,
+      weight: orderItem?.product?.weight,
+      customizeName: orderItem.customizeName,
+      color: orderItem.color,
+      quantity: orderItem.quantity,
+      createdAt: orderItem.createdAt,
     }));
-  }
-
-  private updateOrderRelatedFieldsOnly(
-    order: Order,
-    updateOrderPayload: UpdateOrderDto,
-  ): Order {
-    order.description = updateOrderPayload.description || order.description;
-    order.amount = updateOrderPayload.amount || order.amount;
-    order.quantity = updateOrderPayload.totalProductQuantity || order.quantity;
-    order.paymentMethod =
-      updateOrderPayload.paymentMethod || order.paymentMethod;
-    order.totalWeight = updateOrderPayload.totalWeight || order.totalWeight;
-    order.status = updateOrderPayload.status || order.status;
-    order.orderDate = updateOrderPayload.orderDate || order.orderDate;
-
-    return order;
   }
 
   private async saveProductsInOrder(
     order: Order,
-    orderProducts: Array<OrderProductDto>,
-  ): Promise<Order> {
-    order.products = [];
-    for (const orderProductData of orderProducts) {
-      const orderProduct = new OrderProduct();
-      orderProduct.customizeName = orderProductData.customizeName;
-      orderProduct.price = orderProductData.price;
-      orderProduct.color = orderProductData.color;
-      orderProduct.quantity = orderProductData.quantity;
+    orderItems: Array<OrderItemDto>,
+  ): Promise<void> {
+    const orderItemsToSave: OrderItem[] = [];
+    for (const orderItem of orderItems) {
+      const newOrderItem = new OrderItem();
+      newOrderItem.order = order;
+      newOrderItem.customizeName = orderItem.customizeName;
+      newOrderItem.price = orderItem.price;
+      newOrderItem.color = orderItem.color;
+      newOrderItem.quantity = orderItem.quantity;
 
       const product = await this.productService.getProductById(
-        Number(orderProductData.id),
+        Number(orderItem.productId),
       );
       if (!product) {
         throw new NotFoundException(
-          `Product not found: ${orderProductData.id}`,
+          `Product not found: ${orderItem.productId}`,
         );
       }
-      orderProduct.product = product;
-      order.products.push(orderProduct);
+      newOrderItem.product = product;
+      orderItemsToSave.push(newOrderItem);
     }
-    return order;
+    await this.orderItemRepository.save(orderItemsToSave);
   }
 }

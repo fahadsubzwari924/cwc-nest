@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { OrderStatus } from '../enums/order-setatus.enum';
-import { OrderProductDto } from './create-order.dto';
+import { OrderItemDto } from './create-order.dto';
 
 export class UpdateOrderDto {
   @IsString()
@@ -41,8 +41,8 @@ export class UpdateOrderDto {
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
-  @Type(() => OrderProductDto)
-  products: OrderProductDto[];
+  @Type(() => OrderItemDto)
+  orderItems: OrderItemDto[];
 
   @IsOptional()
   @IsString()
@@ -59,5 +59,4 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsString()
   public orderDate: Date;
-
 }

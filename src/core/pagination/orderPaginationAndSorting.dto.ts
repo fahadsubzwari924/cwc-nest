@@ -17,6 +17,9 @@ export class OrderPaginationAndSortingDTO {
   sortBy = 'orderDate'; // Default sorting column
 
   @IsOptional()
-  @IsIn(['asc', 'desc'])
-  sortOrder: 'asc' | 'desc' = 'desc'; // Default sorting order
+  @IsIn(['ASC', 'DESC'])
+  sortOrder: 'ASC' | 'DESC' = 'DESC'; // Default sorting order
+
+  @IsOptional()
+  filters?: string;
 }

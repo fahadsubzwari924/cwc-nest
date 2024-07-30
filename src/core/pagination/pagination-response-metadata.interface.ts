@@ -3,5 +3,5 @@ export interface IPaginationResponseMeta {
   page: number;
   pageSize: number;
   sortBy: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: 'ASC' | 'DESC';
 }

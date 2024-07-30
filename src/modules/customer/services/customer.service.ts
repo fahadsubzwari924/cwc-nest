@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { ICustomer } from 'src/core/interfaces/customer.interface';
 import { IPaginationResponseMeta } from 'src/core/pagination/pagination-response-metadata.interface';
-import { paginateAndSort } from 'src/core/pagination/paginationAndSort.service';
+import { paginateAndSortWithQueryParams } from 'src/core/pagination/paginationAndSort.service';
 import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 import { Customer } from 'src/entities/customer.entity';
 import { Repository, FindOneOptions, DeleteResult, ILike } from 'typeorm';
@@ -18,7 +18,7 @@ export class CustomerService {
     paginationAndSortingDto: PaginationAndSortingDTO,
   ): Promise<{ data: Array<Customer>; metadata: IPaginationResponseMeta }> {
     const relations = { orders: true };
-    return paginateAndSort(
+    return paginateAndSortWithQueryParams(
       this.customerRepository,
       paginationAndSortingDto,
       relations,

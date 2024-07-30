@@ -15,14 +15,14 @@ import { OrderService } from './services/order.service';
 import { UpdateOrderDto } from './dtos/update-order.dto';
 import { Public } from 'src/utils/decorators/no-intercept.decorator';
 import { Response } from 'express';
-import { OrderPaginationAndSortingDTO } from 'src/core/pagination/orderPaginationAndSorting.dto';
+import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSorting.dto';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  async getAllOrders(@Query() query: OrderPaginationAndSortingDTO) {
+  async getAllOrders(@Query() query: PaginationAndSortingDTO) {
     try {
       return await this.orderService.getAllOrders(query);
     } catch (error) {

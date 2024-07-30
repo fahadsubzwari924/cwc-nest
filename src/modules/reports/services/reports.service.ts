@@ -2,6 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IDashboardStats } from 'src/core/interfaces/dashboard-stats.interface';
 import { Customer, Order, Product } from 'src/entities';
 import { OrderStatus } from 'src/modules/order/enums/order-setatus.enum';
+import { formatCurrency } from 'src/utils/helper.util';
 import { Repository, DataSource } from 'typeorm';
 
 export class ReportService {
@@ -66,6 +67,11 @@ export class ReportService {
       (Number(repeatCustomerCount?.repeatCustomerCount ?? 0) / totalCustomers) *
       100;
 
+    const revenueResult = await this.orderRespository
+      .createQueryBuilder('order')
+      .select('SUM(order.amount)', 'total')
+      .getRawOne();
+
     const stats: IDashboardStats = {
       totalCustomers,
       totalProducts,
@@ -75,6 +81,7 @@ export class ReportService {
       totalDeliveredOrders,
       totalReturnedOrders,
       repeatedCustomerPercentage: `${repeatedCustomerPercentage.toFixed(2)}%`,
+      totalRevenue: formatCurrency(Number(revenueResult?.total)),
     };
 
     return stats;

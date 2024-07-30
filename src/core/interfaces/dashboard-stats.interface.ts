@@ -7,4 +7,5 @@ export interface IDashboardStats {
   totalDeliveredOrders: number;
   totalReturnedOrders: number;
   repeatedCustomerPercentage: string;
+  totalRevenue: any;
 }

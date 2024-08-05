@@ -160,7 +160,7 @@ export class OrderService {
   async deleteOrder(orderId: number): Promise<boolean> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['products'],
+      relations: ['orderItems'],
     });
 
     if (!order) {

@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { IDashboardStats } from 'src/core/interfaces/dashboard-stats.interface';
-import { Customer, Order, Product } from 'src/entities';
+import { Customer, Order, OrderItem, Product } from 'src/entities';
 import { OrderStatus } from 'src/modules/order/enums/order-setatus.enum';
 import { formatCurrency } from 'src/utils/helper.util';
 import { Repository, DataSource } from 'typeorm';
@@ -11,6 +11,8 @@ export class ReportService {
     private customerRepository: Repository<Customer>,
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(Order) private orderRespository: Repository<Order>,
+    @InjectRepository(OrderItem)
+    private readonly orderItemRepository: Repository<OrderItem>,
     private dataSource: DataSource,
   ) {}
 
@@ -72,6 +74,15 @@ export class ReportService {
       .select('SUM(order.amount)', 'total')
       .getRawOne();
 
+    const totalProfit = await this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .leftJoinAndSelect('orderItem.product', 'product')
+      .select(
+        'SUM((orderItem.price - product.cost) * orderItem.quantity)',
+        'total',
+      )
+      .getRawOne();
+
     const stats: IDashboardStats = {
       totalCustomers,
       totalProducts,
@@ -82,6 +93,7 @@ export class ReportService {
       totalReturnedOrders,
       repeatedCustomerPercentage: `${repeatedCustomerPercentage.toFixed(2)}%`,
       totalRevenue: formatCurrency(Number(revenueResult?.total)),
+      totalProfit: formatCurrency(Number(totalProfit?.total)),
     };
 
     return stats;

@@ -13,6 +13,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FileModule } from './modules/file/file.module';
 import { ReportModule } from './modules/reports/reports.module';
+import { OrderSourceModule } from './modules/order-source/order-source.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { ReportModule } from './modules/reports/reports.module';
     UserModule,
     AuthModule,
     FileModule,
-    ReportModule
+    ReportModule,
+    OrderSourceModule,
   ],
   controllers: [AppController],
   providers: [

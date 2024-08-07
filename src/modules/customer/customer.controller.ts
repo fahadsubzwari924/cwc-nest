@@ -8,7 +8,6 @@ import {
   Post,
   Put,
   Query,
-  Logger,
 } from '@nestjs/common';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { CustomerService } from './services/customer.service';

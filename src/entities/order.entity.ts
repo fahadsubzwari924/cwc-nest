@@ -12,6 +12,7 @@ import {
 import { Customer } from './customer.entity';
 import { OrderStatus } from 'src/modules/order/enums/order-setatus.enum';
 import { OrderItem } from './order-item.entity';
+import { OrderSource } from './order-source.entity';
 
 @Entity('orders')
 export class Order extends BaseEntity {
@@ -42,6 +43,11 @@ export class Order extends BaseEntity {
   @JoinColumn({ name: 'customerId' })
   @Index()
   customer: Customer;
+
+  @ManyToOne(() => OrderSource, (orderSource) => orderSource.orders)
+  @JoinColumn({ name: 'orderSourceId' })
+  @Index()
+  orderSource: Customer;
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
   orderItems: OrderItem[];

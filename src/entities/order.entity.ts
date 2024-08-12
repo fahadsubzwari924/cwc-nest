@@ -47,7 +47,7 @@ export class Order extends BaseEntity {
   @ManyToOne(() => OrderSource, (orderSource) => orderSource.orders)
   @JoinColumn({ name: 'orderSourceId' })
   @Index()
-  orderSource: Customer;
+  orderSource: OrderSource;
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
   orderItems: OrderItem[];

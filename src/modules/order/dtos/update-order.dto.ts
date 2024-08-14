@@ -59,4 +59,9 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsString()
   public orderDate: Date;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsOptional()
+  public orderSourceId: number;
 }

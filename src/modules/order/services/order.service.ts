@@ -12,7 +12,7 @@ import { Product } from 'src/entities/product.entity';
 import { OrderProductSubset } from '../types/product.type';
 import { UpdateOrderDto } from '../dtos/update-order.dto';
 import * as PDFDocument from 'pdfkit';
-import { OrderItem } from 'src/entities';
+import { OrderItem, OrderSource } from 'src/entities';
 
 export class OrderService {
   constructor(
@@ -23,12 +23,19 @@ export class OrderService {
     @InjectRepository(OrderItem)
     private readonly orderItemRepository: Repository<OrderItem>,
     private productService: ProductService,
+    @InjectRepository(OrderSource)
+    private readonly orderSourceRepository: Repository<OrderSource>,
   ) {}
 
   async getAllOrders(
     paginationAndSortingDto: PaginationAndSortingDTO,
   ): Promise<{ data: Array<Order>; metadata: IPaginationResponseMeta }> {
-    const relations = ['customer', 'orderItems', 'orderItems.product'];
+    const relations = [
+      'customer',
+      'orderItems',
+      'orderItems.product',
+      'orderSource',
+    ];
     const orders: any = await paginateAndSort(
       this.orderRepository,
       paginationAndSortingDto,
@@ -48,7 +55,12 @@ export class OrderService {
       where: {
         id: id,
       },
-      relations: ['customer', 'orderItems', 'orderItems.product'],
+      relations: [
+        'customer',
+        'orderItems',
+        'orderItems.product',
+        'orderSource',
+      ],
     });
 
     if (order) {
@@ -84,6 +96,17 @@ export class OrderService {
     }
 
     orderToSave.customer = customer;
+
+    const orderSource = await this.orderSourceRepository.findOne({
+      where: { id: orderData.orderSourceId },
+    });
+    if (!orderSource) {
+      throw new NotFoundException(
+        `Order source not found: ${orderData.orderSourceId}`,
+      );
+    }
+
+    orderToSave.orderSource = orderSource;
 
     const newOrder = await this.orderRepository.save(orderToSave);
 
@@ -140,6 +163,19 @@ export class OrderService {
     order.totalWeight = updateOrderPayload.totalWeight || order.totalWeight;
     order.status = updateOrderPayload.status || order.status;
     order.orderDate = updateOrderPayload.orderDate || order.orderDate;
+
+    if (updateOrderPayload?.orderSourceId) {
+      const orderSource = await this.orderSourceRepository.findOne({
+        where: { id: updateOrderPayload.orderSourceId },
+      });
+      if (!orderSource) {
+        throw new NotFoundException(
+          `Order source not found: ${updateOrderPayload.orderSourceId}`,
+        );
+      }
+
+      order.orderSource = orderSource;
+    }
 
     const orderAfterUpdate = await this.orderRepository.save(order);
 

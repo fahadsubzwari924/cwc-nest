@@ -90,4 +90,8 @@ export class CreateOrderDto {
   @IsNotEmpty()
   @IsString()
   public orderDate: Date;
+
+  @IsNotEmpty()
+  @IsNumber()
+  public orderSourceId: number;
 }

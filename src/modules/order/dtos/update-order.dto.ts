@@ -60,8 +60,8 @@ export class UpdateOrderDto {
   @IsString()
   public orderDate: Date;
 
-  @IsNotEmpty()
-  @IsNumber()
   @IsOptional()
-  public orderSourceId: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  public orderSourceIds: Array<number>;
 }

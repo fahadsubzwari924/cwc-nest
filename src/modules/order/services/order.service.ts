@@ -6,13 +6,14 @@ import { PaginationAndSortingDTO } from 'src/core/pagination/paginationAndSortin
 import { Customer } from 'src/entities/customer.entity';
 import { Order } from 'src/entities/order.entity';
 import { ProductService } from 'src/modules/product/services/product.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateOrderDto, OrderItemDto } from '../dtos/create-order.dto';
 import { Product } from 'src/entities/product.entity';
 import { OrderProductSubset } from '../types/product.type';
 import { UpdateOrderDto } from '../dtos/update-order.dto';
 import * as PDFDocument from 'pdfkit';
 import { OrderItem, OrderSource } from 'src/entities';
+import { OrderToSource } from 'src/entities/order-to-source.entity';
 
 export class OrderService {
   constructor(
@@ -25,6 +26,8 @@ export class OrderService {
     private productService: ProductService,
     @InjectRepository(OrderSource)
     private readonly orderSourceRepository: Repository<OrderSource>,
+    @InjectRepository(OrderToSource)
+    private readonly orderToSourceRepository: Repository<OrderToSource>,
   ) {}
 
   async getAllOrders(
@@ -34,7 +37,7 @@ export class OrderService {
       'customer',
       'orderItems',
       'orderItems.product',
-      'orderSource',
+      'orderSources',
     ];
     const orders: any = await paginateAndSort(
       this.orderRepository,
@@ -45,6 +48,7 @@ export class OrderService {
       return {
         ...order,
         products: this.formatOrderProducts(order),
+        orderSources: order.orderSources,
       };
     });
     return { data: transformedOrder, metadata: orders.metadata };
@@ -59,7 +63,7 @@ export class OrderService {
         'customer',
         'orderItems',
         'orderItems.product',
-        'orderSource',
+        'orderSources',
       ],
     });
 
@@ -97,16 +101,18 @@ export class OrderService {
 
     orderToSave.customer = customer;
 
-    const orderSource = await this.orderSourceRepository.findOne({
-      where: { id: orderData.orderSourceId },
-    });
-    if (!orderSource) {
-      throw new NotFoundException(
-        `Order source not found: ${orderData.orderSourceId}`,
-      );
-    }
+    if (orderData?.orderSourceIds?.length) {
+      const orderSources = await this.orderSourceRepository.findBy({
+        id: In(orderData?.orderSourceIds),
+      });
 
-    orderToSave.orderSource = orderSource;
+      if (!orderSources.length) {
+        throw new NotFoundException(
+          `Given order sources not found with ids: ${orderData.orderSourceIds}`,
+        );
+      }
+      orderToSave.orderSources = orderSources;
+    }
 
     const newOrder = await this.orderRepository.save(orderToSave);
 
@@ -164,18 +170,26 @@ export class OrderService {
     order.status = updateOrderPayload.status || order.status;
     order.orderDate = updateOrderPayload.orderDate || order.orderDate;
 
-    if (updateOrderPayload?.orderSourceId) {
-      const orderSource = await this.orderSourceRepository.findOne({
-        where: { id: updateOrderPayload.orderSourceId },
-      });
-      if (!orderSource) {
-        throw new NotFoundException(
-          `Order source not found: ${updateOrderPayload.orderSourceId}`,
-        );
-      }
+    const newOrderSourceIds = updateOrderPayload.orderSourceIds || [];
 
-      order.orderSource = orderSource;
+    // Remove existing order source associations
+    await this.orderSourceRepository
+      .createQueryBuilder()
+      .delete()
+      .from(OrderToSource)
+      .where('orderId = :orderId', { orderId })
+      .execute();
+
+    const newOrderSources = await this.orderSourceRepository.findBy({
+      id: In(newOrderSourceIds),
+    });
+
+    if (!newOrderSources.length) {
+      throw new NotFoundException(
+        `Given order sources not found with ids: ${updateOrderPayload.orderSourceIds}`,
+      );
     }
+    order.orderSources = newOrderSources;
 
     const orderAfterUpdate = await this.orderRepository.save(order);
 
@@ -205,6 +219,8 @@ export class OrderService {
 
     // Remove associated products
     await this.orderItemRepository.remove(order.orderItems);
+
+    await this.orderToSourceRepository.delete({ order: { id: orderId } });
 
     // Remove the order itself
     await this.orderRepository.remove(order);

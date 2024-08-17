@@ -7,6 +7,7 @@ import { ProductService } from '../product/services/product.service';
 import { OrderController } from './order.controller';
 import { OrderService } from './services/order.service';
 import { OrderItem, OrderSource } from 'src/entities';
+import { OrderToSource } from '../../entities/order-to-source.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { OrderItem, OrderSource } from 'src/entities';
       Product,
       OrderItem,
       OrderSource,
+      OrderToSource,
     ]),
   ],
   controllers: [OrderController],

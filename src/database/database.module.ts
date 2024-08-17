@@ -9,6 +9,7 @@ import {
   OrderItem,
   OrderSource,
 } from '../entities';
+import { OrderToSource } from 'src/entities/order-to-source.entity';
 
 @Module({
   imports: [
@@ -22,7 +23,15 @@ import {
         username: configService.get('PG_USERNAME'),
         password: configService.get('PG_PASSWORD'),
         database: configService.get('PG_DATABASE'),
-        entities: [Product, Customer, Order, User, OrderItem, OrderSource],
+        entities: [
+          Product,
+          Customer,
+          Order,
+          User,
+          OrderItem,
+          OrderSource,
+          OrderToSource,
+        ],
         synchronize: true,
         ssl: {
           rejectUnauthorized: false,

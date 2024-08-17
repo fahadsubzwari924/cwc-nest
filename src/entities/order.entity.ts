@@ -5,6 +5,8 @@ import {
   Entity,
   Index,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -44,13 +46,18 @@ export class Order extends BaseEntity {
   @Index()
   customer: Customer;
 
-  @ManyToOne(() => OrderSource, (orderSource) => orderSource.orders)
-  @JoinColumn({ name: 'orderSourceId' })
-  @Index()
-  orderSource: OrderSource;
-
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
   orderItems: OrderItem[];
+
+  @ManyToMany(() => OrderSource, (orderSource) => orderSource.orders, {
+    cascade: true,
+  })
+  @JoinTable({
+    name: 'order_to_sources',
+    joinColumn: { name: 'orderId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'orderSourceId', referencedColumnName: 'id' },
+  })
+  orderSources: OrderSource[];
 
   @Column({
     nullable: true,

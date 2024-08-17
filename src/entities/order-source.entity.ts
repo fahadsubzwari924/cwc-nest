@@ -4,12 +4,12 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  OneToMany,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Order } from './order.entity';
 import { OrderSourceType } from 'src/modules/order/enums/order-source-type.enum';
+import { Order } from './order.entity';
 
 @Entity('order-sources')
 export class OrderSource extends BaseEntity {
@@ -33,7 +33,7 @@ export class OrderSource extends BaseEntity {
   @Column()
   description: string;
 
-  @OneToMany(() => Order, (order) => order.orderSource)
+  @ManyToMany(() => Order, (order) => order.orderSources)
   orders: Order[];
 
   @CreateDateColumn()

@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
   IsArray,
   IsNotEmpty,
   IsNumber,
@@ -92,6 +93,8 @@ export class CreateOrderDto {
   public orderDate: Date;
 
   @IsNotEmpty()
-  @IsNumber()
-  public orderSourceId: number;
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsNumber({}, { each: true })
+  public orderSourceIds: Array<number>;
 }

@@ -172,24 +172,25 @@ export class OrderService {
 
     const newOrderSourceIds = updateOrderPayload.orderSourceIds || [];
 
-    // Remove existing order source associations
-    await this.orderSourceRepository
-      .createQueryBuilder()
-      .delete()
-      .from(OrderToSource)
-      .where('orderId = :orderId', { orderId })
-      .execute();
+    if (newOrderSourceIds?.length) {
+      await this.orderSourceRepository
+        .createQueryBuilder()
+        .delete()
+        .from(OrderToSource)
+        .where('orderId = :orderId', { orderId })
+        .execute();
 
-    const newOrderSources = await this.orderSourceRepository.findBy({
-      id: In(newOrderSourceIds),
-    });
+      const newOrderSources = await this.orderSourceRepository.findBy({
+        id: In(newOrderSourceIds),
+      });
 
-    if (!newOrderSources.length) {
-      throw new NotFoundException(
-        `Given order sources not found with ids: ${updateOrderPayload.orderSourceIds}`,
-      );
+      if (!newOrderSources.length) {
+        throw new NotFoundException(
+          `Given order sources not found with ids: ${updateOrderPayload.orderSourceIds}`,
+        );
+      }
+      order.orderSources = newOrderSources;
     }
-    order.orderSources = newOrderSources;
 
     const orderAfterUpdate = await this.orderRepository.save(order);
 

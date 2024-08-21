@@ -7,43 +7,42 @@ import {
   Length,
   MaxLength,
 } from 'class-validator';
+import { ValidationCodes } from 'src/utils/constants/validation-codes.constant';
 
 export class UpdateCustomerDto {
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @Length(5, 60)
+  @IsNotEmpty({ message: ValidationCodes.customerDTO.customerNameIsRequired })
+  @Length(5, 60, { message: ValidationCodes.customerDTO.customerNameLength })
   @IsOptional()
   public fullName: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: ValidationCodes.customerDTO.contactNumberIsRequired })
   @IsString()
-  @MaxLength(13)
+  @MaxLength(13, { message: ValidationCodes.customerDTO.contactMaxLength })
   @IsOptional()
   public contactNumber: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: ValidationCodes.customerDTO.cityIsRequired })
   @IsString()
   @IsOptional()
   public city: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: ValidationCodes.customerDTO.addressIsRequired })
   @IsString()
-  @MaxLength(300)
+  @MaxLength(300, { message: ValidationCodes.customerDTO.addressMaxLength })
   @IsOptional()
   public address: string;
 
   @ApiProperty()
-  @IsOptional()
-  @IsNumber()
+  @IsNumber({}, { message: ValidationCodes.customerDTO.ageShouldNumber })
   @IsOptional()
   public age: number;
 
   @ApiProperty()
-  @IsOptional()
   @IsString()
   @IsOptional()
   public country: string;

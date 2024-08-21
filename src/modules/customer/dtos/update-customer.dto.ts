@@ -39,12 +39,15 @@ export class UpdateCustomerDto {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  @IsOptional()
   public age: number;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @IsOptional()
   public country: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  public province: string;
 }

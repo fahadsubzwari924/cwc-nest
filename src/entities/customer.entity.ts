@@ -36,6 +36,11 @@ export class Customer extends BaseEntity {
   @Column({
     nullable: false,
   })
+  province: string;
+
+  @Column({
+    nullable: false,
+  })
   address: string;
 
   @Index('customerContactIdx')

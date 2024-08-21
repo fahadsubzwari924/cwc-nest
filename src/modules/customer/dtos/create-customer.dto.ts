@@ -38,7 +38,12 @@ export class CreateCustomerDto {
   public age: number;
 
   @ApiProperty()
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   public country: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  public province: string;
 }

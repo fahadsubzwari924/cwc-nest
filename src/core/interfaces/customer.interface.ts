@@ -6,6 +6,7 @@ export interface ICustomer {
   age: number;
   country: string;
   city: string;
+  province: string;
   address: string;
   contactNumber: string;
   orders?: Array<IOrder>;

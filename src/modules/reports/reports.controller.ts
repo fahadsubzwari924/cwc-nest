@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { ReportService } from './services/reports.service';
 import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
 
-@Controller('report')
+@Controller('reports')
 export class ReportController {
   constructor(private reportService: ReportService) {}
 

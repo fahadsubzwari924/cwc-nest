@@ -39,6 +39,7 @@ import { OrderToSource } from 'src/entities/order-to-source.entity';
         extra: {
           sslmode: 'require',
         },
+        schema: 'public',
       }),
     }),
   ],

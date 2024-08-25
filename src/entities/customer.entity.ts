@@ -34,6 +34,11 @@ export class Customer extends BaseEntity {
   city: string;
 
   @Column({
+    nullable: true,
+  })
+  province: string;
+
+  @Column({
     nullable: false,
   })
   province: string;

@@ -1,38 +1,52 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ICustomResponse } from 'src/core/interfaces/controller-response.interface';
-import { DateRangeDTO } from '../dtos/date-range.dto';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { OrderReportsService } from './services/order-reports.service';
+import { ReportRequestDto } from '../dtos/order-reports.dto';
+import { REPORT_TYPES } from './enums/report-types.enum';
 
 @Controller('reports/orders')
 export class OrderReportsController {
   constructor(private orderReportsService: OrderReportsService) {}
 
-  @Post('demographics')
-  async getCustomerDemographics(
-    @Body() dateRange: DateRangeDTO,
-  ): Promise<ICustomResponse> {
-    const ordersPercentageByProvinces =
-      await this.orderReportsService.getOrderPercentageByProvince(dateRange);
-    return { data: ordersPercentageByProvinces, metadata: { dateRange } };
-  }
+  @Post()
+  async getOrdersReport(@Body() reportRequestDto: ReportRequestDto) {
+    const { reportType, dateRange, year } = reportRequestDto;
 
-  @Get('monthly-orders/:year')
-  async getOrdersByMonth(
-    @Param('year') year: number,
-  ): Promise<ICustomResponse> {
-    const ordersByMonth = await this.orderReportsService.getOrdersByMonth(year);
-    return { data: ordersByMonth, metadata: { year } };
-  }
+    switch (reportType) {
+      case REPORT_TYPES.ORDERS_PERCENTAGE_BY_PROVINCE:
+        const ordersByProvinces =
+          await this.orderReportsService.getOrderPercentageByProvince(
+            dateRange,
+          );
+        return {
+          data: ordersByProvinces,
+          metadata: reportRequestDto,
+        };
 
-  @Get('yearly-orders')
-  async getOrdersByYear(): Promise<ICustomResponse> {
-    const ordersByYear = await this.orderReportsService.getOrderCountByYear();
-    return { data: ordersByYear };
-  }
+      case REPORT_TYPES.MONTHLY_ORDERS:
+        if (!year) {
+          throw new BadRequestException(
+            'Year is required for this report type',
+          );
+        }
+        const monthlyOrders = await this.orderReportsService.getOrdersByMonth(
+          year,
+        );
+        return {
+          data: monthlyOrders,
+          metadata: reportRequestDto,
+        };
 
-  @Get('summary')
-  async getOrdersSummary(): Promise<ICustomResponse> {
-    const salesSummary = await this.orderReportsService.getOrdersSummary();
-    return { data: salesSummary };
+      case REPORT_TYPES.YEARLY_ORDERS:
+        const yearlyOrders =
+          await this.orderReportsService.getOrderCountByYear();
+        return { data: yearlyOrders };
+
+      case REPORT_TYPES.ORDER_SUMMARY:
+        const ordersSummary = await this.orderReportsService.getOrdersSummary();
+        return { data: ordersSummary };
+
+      default:
+        throw new BadRequestException('Invalid report type');
+    }
   }
 }

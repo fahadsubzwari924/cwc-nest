@@ -20,7 +20,6 @@ export class OrderReportsService {
   async getOrderPercentageByProvince(
     dateRange: IDateRange,
   ): Promise<Array<IOrdersPercentageByProvinceReport>> {
-    const { startDate, endDate } = dateRange;
     const queryBuilder = this.orderRepository
       .createQueryBuilder('order')
       .innerJoin('order.customer', 'customer')
@@ -28,11 +27,15 @@ export class OrderReportsService {
       .addSelect('COUNT(order.id)', 'orderCount');
 
     // Apply date filters if provided
-    if (startDate) {
-      queryBuilder.andWhere('order.created_at >= :startDate', { startDate });
-    }
-    if (endDate) {
-      queryBuilder.andWhere('order.created_at <= :endDate', { endDate });
+    if (dateRange) {
+      const { startDate, endDate } = dateRange;
+
+      if (startDate) {
+        queryBuilder.andWhere('order.created_at >= :startDate', { startDate });
+      }
+      if (endDate) {
+        queryBuilder.andWhere('order.created_at <= :endDate', { endDate });
+      }
     }
 
     queryBuilder.groupBy('customer.province');

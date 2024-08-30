@@ -44,15 +44,7 @@ export class CustomerService {
   }
 
   async updateCustomer(id: number, customer: ICustomer): Promise<Customer> {
-    const findOptions: FindOneOptions<Customer> = {
-      where: { id },
-    };
-
-    const existingCustomer = await this.customerRepository.findOne(findOptions);
-
-    if (!existingCustomer) {
-      throw new HttpException('Customer Not Found', HttpStatus.NOT_FOUND);
-    }
+    const existingCustomer = await this.getCustomerById(id);
 
     const updatedCustomer = plainToClass(Customer, {
       ...existingCustomer,

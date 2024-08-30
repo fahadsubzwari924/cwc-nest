@@ -90,24 +90,24 @@ export class ProductController {
     @UploadedFile() thumbnailImage: Express.Multer.File,
     @Body() product: UpdateProductDto,
   ): Promise<ICustomResponse> {
-    await this.productService.getProductById(Number(id));
-
     const uploadOptions: UploadApiOptions = {
       folder: 'product-thumbnails',
     };
 
     /* uploading file to cloud and saving url to product object */
-    const uploadProductThumbnailResponse = await this.fileService.uploadFile(
-      thumbnailImage,
-      uploadOptions,
-    );
-    product.thumbnailImage = uploadProductThumbnailResponse.url;
+    if (thumbnailImage) {
+      const uploadProductThumbnailResponse = await this.fileService.uploadFile(
+        thumbnailImage,
+        uploadOptions,
+      );
+      product.thumbnailImage = uploadProductThumbnailResponse.url;
+    }
 
-    const newProduct = await this.productService.updateProduct(
+    const updatedProduct = await this.productService.updateProduct(
       Number(id),
       product,
     );
-    return { data: newProduct, metadata: { productId: Number(id) } };
+    return { data: updatedProduct, metadata: { productId: Number(id) } };
   }
 
   @Delete(':id')

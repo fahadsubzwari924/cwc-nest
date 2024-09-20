@@ -1,19 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Length,
-  MaxLength,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class DateRangeDTO {
   @ApiProperty()
-  @IsOptional()
+  @IsNotEmpty()
   public startDate: Date;
 
   @ApiProperty()
-  @IsOptional()
+  @IsNotEmpty()
   public endDate: Date;
 }

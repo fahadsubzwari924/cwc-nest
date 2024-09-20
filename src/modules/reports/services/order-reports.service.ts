@@ -2,25 +2,61 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from 'src/entities';
 import { Repository } from 'typeorm';
-import { IDateRange } from '../../interfaces/dateRange.interface';
 import {
   IOrderSummaryReport,
   IOrdersByMonthReport,
   IOrdersByYearReport,
   IOrdersPercentageByProvinceReport,
+  IReportService,
 } from '../interfaces';
+import { ReportFilters, ReportTypeDto } from '../dtos/order-reports.dto';
+import { ORDER_REPORT_TYPES, OrderReportType } from '../enums';
+import { OrderReportResult } from '../types/order-reports.type';
+import { IOrderPercentageBySourceReport } from '../interfaces/orders/ordersBySourceReport.interface';
 
 @Injectable()
-export class OrderReportsService {
+export class OrderReportsService implements IReportService {
+  private reportHandlers: {
+    [key in OrderReportType]: (
+      reportFilters: ReportFilters,
+    ) => Promise<OrderReportResult>;
+  };
+
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
-  ) {}
+  ) {
+    this.reportHandlers = {
+      [ORDER_REPORT_TYPES.ORDERS_PERCENTAGE_BY_PROVINCE]:
+        this.getOrderPercentageByProvince.bind(this),
+      [ORDER_REPORT_TYPES.MONTHLY_ORDERS]: this.getOrdersByMonth.bind(this),
+      [ORDER_REPORT_TYPES.YEARLY_ORDERS]: this.getOrderCountByYear.bind(this),
+      [ORDER_REPORT_TYPES.ORDER_SUMMARY]: this.getOrdersSummary.bind(this),
+      [ORDER_REPORT_TYPES.ORDERS_PERCENTAGE_BY_SOURCE]:
+        this.getOrderPercentageBySource.bind(this),
+    };
+  }
+
+  async generateReport(
+    reportTypes: Array<ReportTypeDto>,
+    reportFilters?: ReportFilters,
+  ): Promise<Record<string, OrderReportResult>> {
+    const results: Record<string, OrderReportResult> = {};
+    for (const reportType of reportTypes) {
+      const reportHandler = this.reportHandlers[reportType.name];
+      if (reportHandler) {
+        results[reportType.name] = await reportHandler(reportFilters);
+      } else {
+        throw new Error(`Unknown report type: ${reportType}`);
+      }
+    }
+
+    return results;
+  }
 
   async getOrderPercentageByProvince(
-    dateRange: IDateRange,
+    reportFilters?: ReportFilters,
   ): Promise<Array<IOrdersPercentageByProvinceReport>> {
-    const { startDate, endDate } = dateRange;
     const queryBuilder = this.orderRepository
       .createQueryBuilder('order')
       .innerJoin('order.customer', 'customer')
@@ -28,11 +64,17 @@ export class OrderReportsService {
       .addSelect('COUNT(order.id)', 'orderCount');
 
     // Apply date filters if provided
-    if (startDate) {
-      queryBuilder.andWhere('order.created_at >= :startDate', { startDate });
-    }
-    if (endDate) {
-      queryBuilder.andWhere('order.created_at <= :endDate', { endDate });
+    if (reportFilters?.dateRange) {
+      const { startDate, endDate } = reportFilters.dateRange;
+
+      if (startDate) {
+        queryBuilder.andWhere('order.orderDate >= :startDate', {
+          startDate,
+        });
+      }
+      if (endDate) {
+        queryBuilder.andWhere('order.orderDate <= :endDate', { endDate });
+      }
     }
 
     queryBuilder.groupBy('customer.province');
@@ -61,7 +103,10 @@ export class OrderReportsService {
     });
   }
 
-  async getOrdersByMonth(year: number): Promise<Array<IOrdersByMonthReport>> {
+  async getOrdersByMonth(
+    reportFilters: ReportFilters,
+  ): Promise<Array<IOrdersByMonthReport>> {
+    const year = reportFilters.year;
     const months = Array.from({ length: 12 }, (_, i) => ({
       monthNumber: i + 1,
       monthName: new Date(2000, i).toLocaleString('default', { month: 'long' }),
@@ -170,11 +215,58 @@ export class OrderReportsService {
         orderCount: data.orderCount,
         orderByMonths: months.map((month) => ({
           month: month.monthName,
-          orderCount: data.months[month.monthNumber] || 0,
+          orderCount: data.months[month.monthNumber] ?? 0,
         })),
       };
     });
 
     return finalResults;
+  }
+
+  async getOrderPercentageBySource(
+    reportFilters?: ReportFilters,
+  ): Promise<Array<IOrderPercentageBySourceReport>> {
+    const queryBuilder = this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoin('order.orderSources', 'orderSource')
+      .select('orderSource.name', 'sourceName')
+      .addSelect('orderSource.type', 'sourceType')
+      .addSelect('COUNT(DISTINCT order.id)', 'orderCount')
+      .groupBy('orderSource.id')
+      .addGroupBy('orderSource.name')
+      .addGroupBy('orderSource.type')
+      .orderBy('"orderCount"', 'DESC');
+
+    // Apply date filters if provided
+    if (reportFilters?.dateRange) {
+      const { startDate, endDate } = reportFilters.dateRange;
+
+      if (startDate) {
+        queryBuilder.andWhere('order.orderDate >= :startDate', { startDate });
+      }
+      if (endDate) {
+        queryBuilder.andWhere('order.orderDate <= :endDate', { endDate });
+      }
+    }
+
+    const result = await queryBuilder.getRawMany();
+
+    // Calculate total orders
+    const totalOrders = result.reduce(
+      (sum, record) => sum + parseInt(record.orderCount),
+      0,
+    );
+
+    return result.map((record) => {
+      const orderCount = parseInt(record.orderCount, 10);
+      const percentage = totalOrders > 0 ? (orderCount / totalOrders) * 100 : 0;
+      const roundedPercentage = Math.round(percentage * 100) / 100;
+
+      return {
+        sourceName: `${record.sourceName}(${record.sourceType})`,
+        orderCount: orderCount,
+        percentage: roundedPercentage,
+      };
+    });
   }
 }

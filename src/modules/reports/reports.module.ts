@@ -3,14 +3,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ReportController } from './reports.controller';
 import { ReportService } from './services/reports.service';
 import { Customer, Order, OrderItem, Product } from 'src/entities';
-import { OrderReportsModule } from './order-reports/order-reports.module';
+import { OrderReportsService } from './services/order-reports.service';
+import { ProductReportsService } from './services/product-reports.service';
+import { ReportServiceRegistry } from './services/report-service.registry';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Customer, Product, Order, OrderItem]),
-    OrderReportsModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Customer, Product, Order, OrderItem])],
   controllers: [ReportController],
-  providers: [ReportService],
+  providers: [
+    ReportService,
+    OrderReportsService,
+    ProductReportsService,
+    ReportServiceRegistry,
+  ],
 })
 export class ReportModule {}

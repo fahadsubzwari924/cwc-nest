@@ -44,6 +44,11 @@ export class ReportService {
       .where('order.status = :status', { status: OrderStatus.DELIVERED })
       .getCount();
 
+    const totalVendorOrders = await this.orderRespository
+      .createQueryBuilder('order')
+      .where('order.status = :status', { status: OrderStatus.VENDOR })
+      .getCount();
+
     const totalReturnedOrders = await this.orderRespository
       .createQueryBuilder('order')
       .where('order.status = :status', { status: OrderStatus.RETURNED })
@@ -76,7 +81,11 @@ export class ReportService {
 
     const totalProfit = await this.orderItemRepository
       .createQueryBuilder('orderItem')
-      .leftJoinAndSelect('orderItem.product', 'product')
+      .innerJoin('orderItem.order', 'order')
+      .innerJoin('orderItem.product', 'product')
+      .where('order.status = :deliveredStatus', {
+        deliveredStatus: OrderStatus.DELIVERED,
+      })
       .select(
         'SUM((orderItem.price - product.cost) * orderItem.quantity)',
         'total',
@@ -91,6 +100,7 @@ export class ReportService {
       totalDispatchedOrders,
       totalDeliveredOrders,
       totalReturnedOrders,
+      totalVendorOrders,
       repeatedCustomerPercentage: `${repeatedCustomerPercentage.toFixed(2)}%`,
       totalRevenue: formatCurrency(Number(revenueResult?.total)),
       totalProfit: formatCurrency(Number(totalProfit?.total)),

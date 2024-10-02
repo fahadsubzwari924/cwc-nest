@@ -6,6 +6,7 @@ export interface IDashboardStats {
   totalDispatchedOrders: number;
   totalDeliveredOrders: number;
   totalReturnedOrders: number;
+  totalVendorOrders: number;
   repeatedCustomerPercentage: string;
   totalRevenue: string;
   totalProfit: string;

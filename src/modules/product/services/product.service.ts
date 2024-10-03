@@ -4,7 +4,7 @@ import { Product } from 'src/entities/product.entity';
 import { DeleteResult, FindOneOptions, ILike, In, Repository } from 'typeorm';
 import { IProduct } from '../interfaces/product';
 import { PaginationAndSortingDTO } from '../../../core/pagination/paginationAndSorting.dto';
-import { paginateAndSort } from '../../../core/pagination/paginationAndSort.service';
+import { paginateAndSortWithQueryParams } from '../../../core/pagination/paginationAndSort.service';
 import { IPaginationResponseMeta } from 'src/core/pagination/pagination-response-metadata.interface';
 import { plainToClass } from 'class-transformer';
 
@@ -17,7 +17,10 @@ export class ProductService {
   async getAllProducts(
     paginationAndSortingDto: PaginationAndSortingDTO,
   ): Promise<{ data: Array<Product>; metadata: IPaginationResponseMeta }> {
-    return paginateAndSort(this.productRepository, paginationAndSortingDto);
+    return paginateAndSortWithQueryParams(
+      this.productRepository,
+      paginationAndSortingDto,
+    );
   }
 
   async getAllProductsByIds(

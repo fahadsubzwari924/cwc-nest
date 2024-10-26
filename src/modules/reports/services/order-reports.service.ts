@@ -107,31 +107,32 @@ export class OrderReportsService implements IReportService {
     reportFilters: ReportFilters,
   ): Promise<Array<IOrdersByMonthReport>> {
     const year = reportFilters.year;
-    const months = Array.from({ length: 12 }, (_, i) => ({
-      monthNumber: i + 1,
-      monthName: new Date(2000, i).toLocaleString('default', { month: 'long' }),
+
+    const ordersByMonthQueryResult = await this.orderRepository.query(
+      `
+      WITH month_series AS (
+        SELECT generate_series(1, 12) AS month_number
+      )
+      SELECT 
+        TO_CHAR(TO_DATE(month_series.month_number::text, 'MM'), 'Month') AS "monthName",
+        COALESCE(order_counts."orderCount", 0) AS "orderCount"
+      FROM month_series
+      LEFT JOIN (
+        SELECT EXTRACT(MONTH FROM "order"."orderDate") AS month_number,
+               COUNT("order"."id") AS "orderCount"
+        FROM "orders" "order"
+        WHERE EXTRACT(YEAR FROM "order"."orderDate") = $1
+        GROUP BY month_number
+      ) AS order_counts ON order_counts.month_number = month_series.month_number
+      ORDER BY month_series.month_number
+      `,
+      [year],
+    );
+
+    return ordersByMonthQueryResult.map((result) => ({
+      month: result.monthName.trim(),
+      orderCount: parseInt(result.orderCount, 10),
     }));
-
-    const ordersByMonthQueryResult = await this.orderRepository
-      .createQueryBuilder('order')
-      .select('EXTRACT(MONTH FROM order.orderDate)', 'month')
-      .addSelect('COUNT(order.id)', 'orderCount')
-      .where('EXTRACT(YEAR FROM order.orderDate) = :year', { year })
-      .groupBy('month')
-      .orderBy('month')
-      .getRawMany();
-
-    const ordersByMonth = months.map((month) => {
-      const monthData = ordersByMonthQueryResult.find(
-        (r) => parseInt(r.month) === month.monthNumber,
-      );
-      return {
-        month: month.monthName,
-        orderCount: monthData ? parseInt(monthData.orderCount) : 0,
-      };
-    });
-
-    return ordersByMonth;
   }
 
   async getOrderCountByYear(): Promise<Array<IOrdersByYearReport>> {

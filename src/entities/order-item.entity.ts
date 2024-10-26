@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Product } from './product.entity';
 import { Order } from './order.entity';
@@ -25,9 +26,11 @@ export class OrderItem {
   })
   price: number;
 
+  @Index()
   @ManyToOne(() => Product, (product) => product.orderItems)
   product: Product;
 
+  @Index()
   @ManyToOne(() => Order, (order) => order.orderItems)
   @JoinColumn({ name: 'orderId' })
   order: Order;

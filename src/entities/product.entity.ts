@@ -11,6 +11,7 @@ import { OrderItem } from './order-item.entity';
 
 @Entity()
 export class Product extends BaseEntity {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 

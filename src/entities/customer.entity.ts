@@ -12,6 +12,7 @@ import { Order } from './order.entity';
 
 @Entity('customers')
 export class Customer extends BaseEntity {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 

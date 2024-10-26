@@ -19,6 +19,7 @@ import { OrderSource } from './order-source.entity';
 @Entity('orders')
 export class Order extends BaseEntity {
   @PrimaryGeneratedColumn('increment')
+  @Index()
   id: number;
 
   @Column({
@@ -64,6 +65,7 @@ export class Order extends BaseEntity {
   })
   totalWeight: string;
 
+  @Index()
   @Column({
     nullable: false,
     type: 'enum',
@@ -72,6 +74,7 @@ export class Order extends BaseEntity {
   })
   status: OrderStatus;
 
+  @Index()
   @Column({
     nullable: false,
     default: new Date(),

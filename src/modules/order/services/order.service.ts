@@ -33,25 +33,14 @@ export class OrderService {
   async getAllOrders(
     paginationAndSortingDto: PaginationAndSortingDTO,
   ): Promise<{ data: Array<Order>; metadata: IPaginationResponseMeta }> {
-    const relations = [
-      'customer',
-      'orderItems',
-      'orderItems.product',
-      'orderSources',
-    ];
+    const relations = ['customer', 'orderSources'];
     const orders: any = await paginateAndSort(
       this.orderRepository,
       paginationAndSortingDto,
       relations,
     );
-    const transformedOrder = orders.data.map((order: Order) => {
-      return {
-        ...order,
-        products: this.formatOrderProducts(order),
-        orderSources: order.orderSources,
-      };
-    });
-    return { data: transformedOrder, metadata: orders.metadata };
+
+    return { data: orders.data, metadata: orders.metadata };
   }
 
   async getOrderById(id: number): Promise<any> {

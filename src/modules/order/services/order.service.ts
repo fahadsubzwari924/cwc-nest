@@ -159,6 +159,21 @@ export class OrderService {
     order.status = updateOrderPayload.status || order.status;
     order.orderDate = updateOrderPayload.orderDate || order.orderDate;
 
+    if (updateOrderPayload.customerId != null) {
+      const currentCustomerId = order.customer?.id;
+      if (updateOrderPayload.customerId !== currentCustomerId) {
+        const customer = await this.customerRepository.findOne({
+          where: { id: updateOrderPayload.customerId },
+        });
+        if (!customer) {
+          throw new NotFoundException(
+            `Customer not found: ${updateOrderPayload.customerId}`,
+          );
+        }
+        order.customer = customer;
+      }
+    }
+
     const newOrderSourceIds = updateOrderPayload.orderSourceIds || [];
 
     if (newOrderSourceIds?.length) {

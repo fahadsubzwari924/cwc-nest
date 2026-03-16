@@ -14,6 +14,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { FileModule } from './modules/file/file.module';
 import { ReportModule } from './modules/reports/reports.module';
 import { OrderSourceModule } from './modules/order-source/order-source.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { OrderSourceModule } from './modules/order-source/order-source.module';
     FileModule,
     ReportModule,
     OrderSourceModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [

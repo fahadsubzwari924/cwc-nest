@@ -23,7 +23,8 @@
     "migration:generate": "typeorm migration:generate -d dist/database/data-source.js",
     "migration:run": "typeorm migration:run -d dist/database/data-source.js",
     "migration:revert": "typeorm migration:revert -d dist/database/data-source.js",
-    "migration:create": "typeorm migration:create src/database/migrations/Migration"
+    "migration:create": "typeorm migration:create src/database/migrations/Migration",
+    "docs:openapi": "ts-node -r tsconfig-paths/register scripts/generate-openapi.ts"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",

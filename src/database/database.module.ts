@@ -32,7 +32,9 @@ import { OrderToSource } from 'src/entities/order-to-source.entity';
           OrderSource,
           OrderToSource,
         ],
-        synchronize: true,
+        migrations: [__dirname + '/migrations/**/*.js'],
+        synchronize: false,
+        migrationsRun: false,
         ssl: {
           rejectUnauthorized: false,
         },

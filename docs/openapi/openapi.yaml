@@ -1,0 +1,113 @@
+openapi: 3.0.3
+info:
+  title: CustomizeWithClass API
+  description: |
+    REST API for the Customize With Class order-management product.
+    Global prefix on all routes: `/api/v1`.
+
+    For an exhaustive, generated list of paths and schemas, run the server and open
+    Swagger UI at `/api` or export OpenAPI JSON (see README in this folder).
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local default
+  - url: https://cwc-api-production.up.railway.app/api/v1
+    description: Example production (verify current deploy URL in environment config)
+
+tags:
+  - name: cwc
+    description: Application API
+
+components:
+  securitySchemes:
+    bearerJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Staff JWT from `POST /auth/login` (use the token value only).
+
+  schemas:
+    GenericSuccessResponse:
+      type: object
+      description: |
+        Successful responses are wrapped by `ResponseInterceptor` into `GenericResponseDto`.
+        Controllers return `{ data, metadata }`; clients receive `payload` (from internal `records`) and `metadata`.
+      properties:
+        payload:
+          description: Response body from the controller (arrays, objects, primitives).
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Optional per-endpoint metadata (e.g. ids, search terms, pagination).
+        error:
+          type: string
+          nullable: true
+          description: Absent or null on success.
+
+    GenericErrorResponse:
+      type: object
+      description: Error responses from `CustomExceptionFilter` use the same DTO shape.
+      properties:
+        payload:
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+        error:
+          type: string
+          description: Error message string.
+
+    PaginationQuery:
+      type: object
+      description: Common list endpoints accept these query parameters (see `PaginationAndSortingDTO`).
+      properties:
+        page:
+          type: integer
+          default: 1
+        pageSize:
+          type: integer
+          default: 10
+        sortBy:
+          type: string
+          default: createdAt
+        sortOrder:
+          type: string
+          enum: [ASC, DESC]
+          default: DESC
+        filters:
+          type: string
+          description: Optional filter string (endpoint-specific).
+
+    PaginationMetadata:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        sortBy:
+          type: string
+        sortOrder:
+          type: string
+          enum: [ASC, DESC]
+
+security:
+  - bearerJWT: []
+
+paths:
+  /health:
+    get:
+      tags: [cwc]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'

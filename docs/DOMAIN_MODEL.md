@@ -31,7 +31,7 @@ erDiagram
 | `Customer` | `customers` | `fullName`, `age`, `country`, `city`, **`province`**, `address`, `contactNumber`. |
 | `Product` | (default) | Unique `name`, `description`, `cost`, `weight`, optional `thumbnailImage`. |
 | `Order` | `orders` | `description`, `amount`, `paymentMethod`, `quantity`, `totalWeight`, **`status`** (enum), **`orderDate`**, FK to customer, M2M sources. |
-| `OrderItem` | `order-items` | FK to order + product; line `price`, `quantity`, optional **`color`**, **`customizeName`**. |
+| `OrderItem` | `order-items` | FK to order + product; line `price`, `quantity`, optional **`color`**, **`customizeName`**; **`unitCostSnapshot`** = product unit cost at sale (historical COGS for profit). |
 | `OrderSource` | `order-sources` | Channel catalog: `name`, **`type`** (enum: instagram / facebook / web), `description`. |
 | `OrderToSource` | `order_to_sources` | Join rows between orders and sources (used when replacing sources on update). |
 

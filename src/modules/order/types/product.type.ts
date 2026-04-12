@@ -4,6 +4,6 @@ import { Product } from 'src/entities/product.entity';
 /* Picking some fields from both Product & OrderProduct to create new type */
 export type OrderProductSubset = Pick<
   OrderItem,
-  'customizeName' | 'price' | 'color' | 'createdAt'
+  'customizeName' | 'price' | 'color' | 'createdAt' | 'unitCostSnapshot'
 > &
   Pick<Product, 'id' | 'name' | 'cost' | 'weight'>;

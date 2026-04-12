@@ -17,6 +17,7 @@ Copy **`.env.example`** to **`.env`** and fill in values (do not commit `.env`).
 | `PG_USERNAME` | DB user |
 | `PG_PASSWORD` | DB password |
 | `PG_DATABASE` | Database name |
+| `PG_SSL` | Optional. Set to **`false`** (or `0`, `no`, `off`, `disable`) if Postgres **does not** use TLS. If unset or truthy, the app uses SSL (`rejectUnauthorized: false`) and `sslmode=require`, which matches many hosted databases but fails on plain Postgres without SSL. |
 
 ### Required for auth
 
@@ -44,7 +45,7 @@ npm install
 npm run start:dev
 ```
 
-Ensure PostgreSQL is reachable and SSL settings in `database.module.ts` match your environment (hosted DBs often require SSL; local Postgres may not).
+Ensure PostgreSQL is reachable. Use **`PG_SSL=false`** in `.env` when the server does not support SSL (see env table above).
 
 ---
 
@@ -66,7 +67,23 @@ npm run build
 npm run migration:run
 ```
 
-Scripts use `dist/database/data-source.js` — **build before running** `migration:run` / `migration:revert`.
+Scripts use `dist/src/database/data-source.js` (Nest’s compile output) — **build before running** `migration:run` / `migration:revert`. The data source loads **`.env` from the current working directory** (run commands from the `nest-server` repo root so `PG_*` and `PG_SSL` apply).
+
+**Historical dashboard totals:** migration `BackfillOrderTotalsFromLineItems1774100000000` first creates **full row snapshots** in the same database: **`orders_backup_before_1774100000000`** and **`order-items_backup_before_1774100000000`** (data only, no indexes/FKs). If either table already exists, the migration **fails** until you drop it (so an accidental re-run does not overwrite a backup). It then recomputes each order’s **`amount`** and **`quantity`** from **`order-items`**, and sets **`unitCostSnapshot`** where null from **`product.cost`**. Run with `npm run build && npm run migration:run`. This does not correct wrong **per-line quantities** in old rows—only headers and missing snapshots.
+
+**Restore from those backups** (maintenance window, no app traffic). `order_to_sources` is **not** copied; export that table first if you must preserve channel links, or re-attach sources after restore.
+
+```sql
+BEGIN;
+DELETE FROM order_to_sources;
+DELETE FROM "order-items";
+DELETE FROM orders;
+INSERT INTO orders SELECT * FROM orders_backup_before_1774100000000;
+INSERT INTO "order-items" SELECT * FROM "order-items_backup_before_1774100000000";
+COMMIT;
+```
+
+Then verify data, re-seed `order_to_sources` if needed, and drop the `*_backup_before_*` tables when you no longer need them.
 
 Authoring:
 

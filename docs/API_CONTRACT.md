@@ -96,7 +96,7 @@ Exact list is defined in code via `@Public()`. As of the spec authoring pass, th
 | `/products` | Product |
 | `/orders` | Order |
 | `/order-sources` | OrderSource |
-| `/reports` | Reports (+ `GET .../dashboard/stats`) |
+| `/reports` | Reports (+ `GET .../dashboard/stats`) — `POST` body `reportTypes[]` may include order reports `monthly_profit` and `yearly_profit` (category `orders`). Both use **delivered** orders only; rows include numeric `revenue` and `profit`. **`monthly_profit`** requires `filters.year`. **`yearly_profit`** spans all years present in `orders` (filled with zeros). |
 | `/files` | File |
 | `/health` | Health |
 

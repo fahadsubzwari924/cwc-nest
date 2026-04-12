@@ -1,0 +1,75 @@
+---
+description: Ship feature or bugfix — create a PR using a fixed git workflow (stash, default branch, pull, topic branch, commit, push, PR). Use when the user asks to ship, open/create a PR, merge-ready handoff, or publish a branch for review.
+globs: ""
+alwaysApply: false
+---
+
+# Ship feature / bugfix (pull request)
+
+Run these steps in the **repository the user asked to ship** (this workspace or the path they name). Work that touches **both** `nest-server` and `cvc-angular` needs **one PR per repo**; cross-link PRs in the descriptions.
+
+**Execution role:** Prefer `@agency-devops-automator.mdc` or another git-capable Agency role when running commands for the user.
+
+## Before you start
+
+- Confirm **build** (and **lint** / **test** when scripts exist) pass, or document known gaps in the PR.
+- Know whether the working tree has **uncommitted** changes (stash path) or everything is already committed.
+
+## Default branch
+
+Do not assume the branch name. Resolve the integration branch, then use it everywhere below as `$DEFAULT_BRANCH`:
+
+- Prefer: `git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`  
+- Fallback: `main`, or `master`, or team docs.
+
+## Procedure (order matters)
+
+1. **Stash uncommitted work** (only if the tree is dirty)  
+   - Check: `git status --porcelain`  
+   - If non-empty: `git stash push -u -m "wip: before ship branch"`  
+   - If clean: skip stash; **do not** `stash pop` later.
+
+2. **Move to default branch and update**  
+   - `git fetch origin`  
+   - `git checkout $DEFAULT_BRANCH`  
+   - `git pull origin $DEFAULT_BRANCH`
+
+3. **Create a topic branch**  
+   - Feature: `git checkout -b feature/<short-kebab-slug>`  
+   - Bugfix: `git checkout -b bugfix/<short-kebab-slug>`  
+   Slug examples: `reports-profit-endpoints`, `fix-order-query`.
+
+4. **Bring work onto the branch**  
+   - If you stashed: `git stash pop` — resolve conflicts, re-verify build/tests.  
+   - If work was already committed on another branch: **cherry-pick** or **merge** only as the user directs; otherwise commit current changes here (step 5).
+
+5. **Commit**  
+   - `git add` intentional paths only.  
+   - Message: **Conventional Commits** — `feat(scope): summary` / `fix(scope): summary` / `docs: …` / `chore: …` (present tense).
+
+6. **Push**  
+   - `git push -u origin HEAD`
+
+7. **Open the PR**  
+   - With **GitHub CLI**: `gh pr create --base $DEFAULT_BRANCH --title "…" --body "…"`  
+   - Without `gh`: use the compare URL from `git push` output or the hosting UI.
+
+## PR title
+
+- Short, imperative, optional scope: e.g. `feat(reports): monthly and yearly profit reports`
+
+## PR description (use this shape)
+
+Write in full sentences.
+
+1. **What** — user-visible or API behaviour (1–3 sentences).  
+2. **Why** — problem, context, or ticket link.  
+3. **How to verify** — exact commands (`npm run build`, `npm run migration:run` if relevant, etc.) or QA steps.  
+4. **Risk / rollback** — blast radius; migrations/data; rollback = revert this PR.  
+5. **Related** — link sibling-repo PR if applicable.
+
+## Do not
+
+- Force-push to the shared default branch.  
+- Commit secrets, tokens, or production credentials.  
+- Leave a stash applied twice or forget `stash pop` after `stash push` in this flow.

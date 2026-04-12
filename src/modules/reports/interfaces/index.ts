@@ -3,6 +3,8 @@ export * from './orders/orderPercentageByProvinceReport.interface';
 export * from './orders/orderSummaryReport.interface';
 export * from './orders/ordersByMonthReport.interface';
 export * from './orders/ordersByYearReport.interface';
+export * from './orders/monthlyProfitReport.interface';
+export * from './orders/yearlyProfitReport.interface';
 export * from './report-service.interface';
 export * from './products/topProductsReport.interface';
 export * from './reports/dashboard-stats.interface';

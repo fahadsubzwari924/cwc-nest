@@ -57,6 +57,10 @@ Provide PostgreSQL and required env vars (see [`docs/OPERATIONS.md`](docs/OPERAT
 - Run `npm run build` before `migration:*` scripts that read `dist/`.
 - Add or update tests under `*.spec.ts` near the code when behavior changes.
 
+## Shipping (pull requests)
+
+When the user asks to **ship**, **open/create a PR**, or hand off merge-ready work, use the canonical checklist in **`.cursor/rules/ship-feature.mdc`** (also summarized in **`.ai/workflow.md`** step 6). In short: stash if dirty → checkout the repo’s **default** branch and pull → create **`feature/…`** or **`bugfix/…`** → `stash pop` if you stashed → conventional commit(s) → push → open PR with a proper **title** and **description** (what, why, verify, risk/rollback, related PRs for `cvc-angular`). Prefer **`@agency-devops-automator.mdc`** for executing that git/PR flow.
+
 ## References
 
 - Postman: `docs/postman_collection`

@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from 'src/entities';
+import { OrderStatus } from 'src/modules/order/enums/order-setatus.enum';
 import { Repository } from 'typeorm';
 import {
   IOrderSummaryReport,
   IOrdersByMonthReport,
   IOrdersByYearReport,
   IOrdersPercentageByProvinceReport,
+  IMonthlyProfitReport,
+  IYearlyProfitReport,
   IReportService,
 } from '../interfaces';
 import { ReportFilters, ReportTypeDto } from '../dtos/order-reports.dto';
@@ -34,6 +37,8 @@ export class OrderReportsService implements IReportService {
       [ORDER_REPORT_TYPES.ORDER_SUMMARY]: this.getOrdersSummary.bind(this),
       [ORDER_REPORT_TYPES.ORDERS_PERCENTAGE_BY_SOURCE]:
         this.getOrderPercentageBySource.bind(this),
+      [ORDER_REPORT_TYPES.MONTHLY_PROFIT]: this.getMonthlyProfit.bind(this),
+      [ORDER_REPORT_TYPES.YEARLY_PROFIT]: this.getYearlyProfit.bind(this),
     };
   }
 
@@ -269,5 +274,126 @@ export class OrderReportsService implements IReportService {
         percentage: roundedPercentage,
       };
     });
+  }
+
+  async getMonthlyProfit(
+    reportFilters: ReportFilters,
+  ): Promise<Array<IMonthlyProfitReport>> {
+    const year = reportFilters?.year;
+    if (year == null || Number.isNaN(Number(year))) {
+      throw new Error('year is required for monthly_profit report');
+    }
+
+    const rows = await this.orderRepository.query(
+      `
+      WITH month_series AS (
+        SELECT generate_series(1, 12) AS month_number
+      ),
+      revenue_by_month AS (
+        SELECT EXTRACT(MONTH FROM o."orderDate")::int AS month_number,
+               SUM(o.amount) AS revenue
+        FROM "orders" o
+        WHERE o.status = $2
+          AND EXTRACT(YEAR FROM o."orderDate") = $1
+        GROUP BY 1
+      ),
+      profit_by_month AS (
+        SELECT EXTRACT(MONTH FROM o."orderDate")::int AS month_number,
+               SUM(
+                 (oi.price - COALESCE(oi."unitCostSnapshot", p.cost))
+                 * COALESCE(oi.quantity, 1)
+               ) AS profit
+        FROM "orders" o
+        INNER JOIN "order-items" oi ON oi."orderId" = o.id
+        LEFT JOIN "product" p ON p.id = oi."productId"
+        WHERE o.status = $2
+          AND EXTRACT(YEAR FROM o."orderDate") = $1
+        GROUP BY 1
+      )
+      SELECT
+        TO_CHAR(TO_DATE(month_series.month_number::text, 'MM'), 'Month') AS "monthName",
+        COALESCE(r.revenue, 0) AS revenue,
+        COALESCE(p.profit, 0) AS profit
+      FROM month_series
+      LEFT JOIN revenue_by_month r ON r.month_number = month_series.month_number
+      LEFT JOIN profit_by_month p ON p.month_number = month_series.month_number
+      ORDER BY month_series.month_number
+      `,
+      [year, OrderStatus.DELIVERED],
+    );
+
+    return rows.map(
+      (row: { monthName: string; revenue: unknown; profit: unknown }) => ({
+        month: row.monthName.trim(),
+        revenue: Number(row.revenue) || 0,
+        profit: Number(row.profit) || 0,
+      }),
+    );
+  }
+
+  async getYearlyProfit(): Promise<Array<IYearlyProfitReport>> {
+    const yearRange = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('MIN(EXTRACT(YEAR FROM order.orderDate))', 'minYear')
+      .addSelect('MAX(EXTRACT(YEAR FROM order.orderDate))', 'maxYear')
+      .getRawOne();
+
+    const minYear = parseInt(yearRange.minYear, 10);
+    const maxYear = parseInt(yearRange.maxYear, 10);
+
+    if (!Number.isFinite(minYear) || !Number.isFinite(maxYear)) {
+      return [];
+    }
+
+    const revenueRows = await this.orderRepository.query(
+      `
+      SELECT EXTRACT(YEAR FROM o."orderDate")::int AS year,
+             SUM(o.amount) AS revenue
+      FROM "orders" o
+      WHERE o.status = $1
+        AND EXTRACT(YEAR FROM o."orderDate") BETWEEN $2 AND $3
+      GROUP BY 1
+      ORDER BY 1
+      `,
+      [OrderStatus.DELIVERED, minYear, maxYear],
+    );
+
+    const profitRows = await this.orderRepository.query(
+      `
+      SELECT EXTRACT(YEAR FROM o."orderDate")::int AS year,
+             SUM(
+               (oi.price - COALESCE(oi."unitCostSnapshot", p.cost))
+               * COALESCE(oi.quantity, 1)
+             ) AS profit
+      FROM "orders" o
+      INNER JOIN "order-items" oi ON oi."orderId" = o.id
+      LEFT JOIN "product" p ON p.id = oi."productId"
+      WHERE o.status = $1
+        AND EXTRACT(YEAR FROM o."orderDate") BETWEEN $2 AND $3
+      GROUP BY 1
+      ORDER BY 1
+      `,
+      [OrderStatus.DELIVERED, minYear, maxYear],
+    );
+
+    const revenueByYear = new Map<number, number>();
+    for (const row of revenueRows) {
+      revenueByYear.set(Number(row.year), Number(row.revenue) || 0);
+    }
+    const profitByYear = new Map<number, number>();
+    for (const row of profitRows) {
+      profitByYear.set(Number(row.year), Number(row.profit) || 0);
+    }
+
+    const finalResult: Array<IYearlyProfitReport> = [];
+    for (let y = minYear; y <= maxYear; y++) {
+      finalResult.push({
+        year: y,
+        revenue: revenueByYear.get(y) ?? 0,
+        profit: profitByYear.get(y) ?? 0,
+      });
+    }
+
+    return finalResult;
   }
 }

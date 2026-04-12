@@ -11,7 +11,7 @@ For **any** work type—feature, bugfix, idea/spike, refactor, documentation, or
 3. **Plan** — ordered tasks with file paths, verification per task, and **Agency specialist per task** (use `/kickoff` or `.ai/agents.md` mapping)
 4. **Implement** — smallest vertical slice first; keep diffs reviewable. Always bind implementation workers to an **Agency specialist** per plan or `.ai/agents.md`—use `/implement` or Superpowers subagent-driven-development with Agency role prepended to each task
 5. **Review** — run `npm run lint` and `npm run test`; fix or document exceptions
-6. **Ship** — conventional commit; PR notes include risk + rollback
+6. **Ship** — follow **`.cursor/rules/ship-feature.mdc`**: resolve `$DEFAULT_BRANCH` (do not hard-code `main`/`master`); stash uncommitted work if any → checkout default → `git pull` → `feature/<slug>` or `bugfix/<slug>` → `stash pop` if applicable → conventional commit(s) → push → open PR with title + structured body (what / why / verify / risk / related PRs). Cross-repo work = one PR per repository.
 
 ## Plan execution modes
 

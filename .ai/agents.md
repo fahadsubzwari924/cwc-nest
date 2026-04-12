@@ -88,6 +88,6 @@ When operating as any implementation specialist, these rules apply **regardless 
 
 **Superpowers + Agency are on by default** via workspace rules and the Superpowers plugin—no need to ask the user to cite `.cursor-plugin` or `vendor/` paths unless setup is broken.
 
-- Follow **`routing.mdc`** (always applied) plus `.cursor/rules/workflow.mdc`, `review.mdc`, `agents.mdc` when the task matches
+- Follow **`routing.mdc`** (always applied) plus `.cursor/rules/workflow.mdc`, `review.mdc`, `agents.mdc` when the task matches; for **ship / PR**, follow **`.cursor/rules/ship-feature.mdc`** and **`AGENTS.md`** § Shipping
 - Load relevant `agency-*.mdc` when using a named Agency specialist—**including** each implementation Task/subagent during plan execution (see § Implementation plans + Superpowers subagents)
 - Keep `.cursorrules` as the index; do not duplicate `.ai/rules.md`

@@ -1,0 +1,15 @@
+---
+description: Core coding constraints for y (token-lean; details in .ai/rules.md)
+globs: "**/*"
+alwaysApply: true
+---
+
+# Core rules
+
+- Default routing: `routing.mdc` — Superpowers for workflow phases, Agency specialist for execution (including **each** implementation subagent/Task). DISPATCH RULE: bind an `agency-*.mdc` role to every implementation task before starting
+- Read `.ai/rules.md` for full standards; obey stack row for TypeScript / NestJS
+- Max **200** lines/file, **50** lines/function; early returns; no commented-out code in commits
+- Run `npm run lint` before hand-off; fix or explain waivers
+- Do not commit secrets or log tokens/PII
+- Touch tests when behavior changes (`npm run test`) or document the gap
+- Use `docs/CONVENTIONS.md` for stack-specific style; load other `docs/*` only when needed

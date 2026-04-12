@@ -12,3 +12,4 @@ alwaysApply: false
 - TDD when harness exists: red → green → refactor; add minimal harness if missing and user agrees
 - Each plan task lists **path**, **intent**, **verification** (command or observable outcome), and **Agency role**
 - Map errors per `docs/ERROR-HANDLING.md`; API shape per `docs/API-PATTERNS.md` when touching HTTP
+- **Ship / PR:** `.cursor/rules/ship-feature.mdc` (see `.ai/workflow.md` step 6)

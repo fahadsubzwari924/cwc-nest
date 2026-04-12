@@ -11,6 +11,7 @@ alwaysApply: true
 - Idea or brainstorm → brainstorming + product/planning before implementation.
 - Add a feature → plan (e.g. writing-plans) then implement and verify (TDD when a harness exists).
 - Review or ship → review/verification skills plus reviewer (or security) role as fits.
+- **Open a PR / ship a feature or bugfix** → follow **`.cursor/rules/ship-feature.mdc`** end-to-end (stash if needed → default branch → pull → `feature/*` or `bugfix/*` branch → stash pop → commit → push → PR with title + body template). Bind git/PR execution to **`@agency-devops-automator.mdc`** when appropriate.
 
 ## DISPATCH RULE (non-negotiable)
 

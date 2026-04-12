@@ -14,7 +14,8 @@ If `vendor/` or `.cursor-plugin/` is missing, run `npx ai-dev-setup init` withou
 | File | Purpose |
 |------|---------|
 | `.ai/rules.md` | Engineering principles (SOLID, DRY, KISS, YAGNI), anti-patterns, layer rules |
-| `.ai/workflow.md` | Lifecycle, TDD, review checklist |
+| `.ai/workflow.md` | Lifecycle, TDD, review checklist, ship/PR summary (step 6) |
+| `.cursor/rules/ship-feature.mdc` | **Ship / PR:** stash → default branch → pull → feature\|bugfix branch → stash pop → commit → push → PR title & body |
 | `.ai/agents.md` | Specialist activation + quality expectations per role |
 | `docs/CONVENTIONS.md` | Stack-specific patterns: layer separation, constants, input validation |
 | `docs/API-PATTERNS.md` | HTTP layer responsibilities + validation contract — load on every API task |

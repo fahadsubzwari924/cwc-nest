@@ -4,6 +4,8 @@ export const ORDER_REPORT_TYPES = {
   YEARLY_ORDERS: 'yearly_orders',
   ORDER_SUMMARY: 'order_summary',
   ORDERS_PERCENTAGE_BY_SOURCE: 'orders_percentage_by_source',
+  MONTHLY_PROFIT: 'monthly_profit',
+  YEARLY_PROFIT: 'yearly_profit',
 } as const;
 
 export type OrderReportType =

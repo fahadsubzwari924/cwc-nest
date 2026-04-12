@@ -130,7 +130,7 @@ export class ReportService {
     const totalProfitQuery = this.orderRespository
       .createQueryBuilder('order')
       .select(
-        'SUM(CASE WHEN order.status = :delivered THEN (orderItem.price - product.cost) * orderItem.quantity ELSE 0 END)',
+        'SUM(CASE WHEN order.status = :delivered THEN (orderItem.price - COALESCE(orderItem.unitCostSnapshot, product.cost)) * COALESCE(orderItem.quantity, 1) ELSE 0 END)',
         'totalProfit',
       )
       .leftJoin('order.orderItems', 'orderItem')
@@ -143,8 +143,8 @@ export class ReportService {
     ]);
 
     return {
-      totalRevenue: parseFloat(totalRevenue.totalRevenue),
-      totalProfit: parseFloat(totalProfit.totalProfit),
+      totalRevenue: Number(totalRevenue.totalRevenue) || 0,
+      totalProfit: Number(totalProfit.totalProfit) || 0,
     };
   }
 }

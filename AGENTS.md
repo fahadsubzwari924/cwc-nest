@@ -21,7 +21,7 @@ Full spec index: this file + [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`d
 npm install
 ```
 
-Provide PostgreSQL and required env vars (see [`docs/OPERATIONS.md`](docs/OPERATIONS.md)). Minimum validated at startup: `PG_HOST`, `PG_PORT`, `PG_USERNAME`, `PG_PASSWORD`, `PG_DATABASE`. Also set `JWT_SECRET`, `JWT_EXPIRY` for auth.
+Provide PostgreSQL and required env vars (see [`docs/OPERATIONS.md`](docs/OPERATIONS.md)). Minimum validated at startup: `PG_HOST`, `PG_PORT`, `PG_USERNAME`, `PG_PASSWORD`, `PG_DATABASE`. Use **`PG_SSL=false`** when the database does not support TLS. Also set `JWT_SECRET`, `JWT_EXPIRY` for auth.
 
 ## Commands
 
@@ -31,7 +31,7 @@ Provide PostgreSQL and required env vars (see [`docs/OPERATIONS.md`](docs/OPERAT
 | `npm run build` | Compile to `dist/` |
 | `npm run start:prod` | Run `dist/main` |
 | `npm test` | Unit tests |
-| `npm run migration:run` | Run migrations (uses `dist/database/data-source.js`; build first) |
+| `npm run migration:run` | Run migrations (uses `dist/src/database/data-source.js`; build first) |
 | `npm run docs:openapi` | Generate `docs/openapi/openapi.json` (needs working DB connection) |
 
 ## Layout

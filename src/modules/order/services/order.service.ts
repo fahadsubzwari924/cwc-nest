@@ -71,8 +71,10 @@ export class OrderService {
 
     /* populating order fields */
     orderToSave.description = orderData.description;
-    orderToSave.amount = orderData.amount;
-    orderToSave.quantity = orderData.totalProductQuantity;
+    orderToSave.amount = this.computeAmountFromItemDtos(orderData.orderItems);
+    orderToSave.quantity = this.computeTotalUnitsFromItemDtos(
+      orderData.orderItems,
+    );
     orderToSave.paymentMethod = orderData.paymentMethod;
     orderToSave.totalWeight = orderData.totalWeight;
     orderToSave.orderDate = orderData.orderDate;
@@ -108,6 +110,7 @@ export class OrderService {
     // saving products to sync with incoming products
     if (orderData?.orderItems?.length) {
       await this.saveProductsInOrder(newOrder, orderData.orderItems);
+      await this.syncOrderHeaderTotals(newOrder.id);
     }
 
     const createdOrder = await this.getOrderById(newOrder.id);
@@ -142,17 +145,23 @@ export class OrderService {
     orderId: number,
     updateOrderPayload: UpdateOrderDto,
   ): Promise<Order> {
-    const order: Order = await this.getOrderById(orderId);
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: [
+        'customer',
+        'orderItems',
+        'orderItems.product',
+        'orderSources',
+      ],
+    });
 
     if (!order) {
       throw new NotFoundException(`Order with id ${orderId} not found`);
     }
 
-    // Update order fields
+    // Update order fields (amount / quantity come from line items after sync)
 
     order.description = updateOrderPayload.description || order.description;
-    order.amount = updateOrderPayload.amount || order.amount;
-    order.quantity = updateOrderPayload.totalProductQuantity || order.quantity;
     order.paymentMethod =
       updateOrderPayload.paymentMethod || order.paymentMethod;
     order.totalWeight = updateOrderPayload.totalWeight || order.totalWeight;
@@ -208,6 +217,8 @@ export class OrderService {
       );
     }
 
+    await this.syncOrderHeaderTotals(orderId);
+
     const updatedOrder = await this.getOrderById(order.id);
     return updatedOrder;
   }
@@ -238,6 +249,7 @@ export class OrderService {
       id: orderItem?.product?.id,
       name: orderItem?.product?.name,
       cost: orderItem?.product?.cost,
+      unitCostSnapshot: orderItem.unitCostSnapshot,
       price: orderItem.price,
       weight: orderItem?.product?.weight,
       customizeName: orderItem.customizeName,
@@ -258,7 +270,7 @@ export class OrderService {
       newOrderItem.customizeName = orderItem.customizeName;
       newOrderItem.price = orderItem.price;
       newOrderItem.color = orderItem.color;
-      newOrderItem.quantity = orderItem.quantity;
+      newOrderItem.quantity = this.normalizeLineQuantity(orderItem.quantity);
 
       const product = await this.productService.getProductById(
         Number(orderItem.productId),
@@ -269,8 +281,47 @@ export class OrderService {
         );
       }
       newOrderItem.product = product;
+      newOrderItem.unitCostSnapshot = product.cost;
       orderItemsToSave.push(newOrderItem);
     }
     await this.orderItemRepository.save(orderItemsToSave);
+  }
+
+  private normalizeLineQuantity(quantity: number): number {
+    const n = Math.floor(Number(quantity));
+    return n >= 1 ? n : 1;
+  }
+
+  private lineRevenue(price: number, quantity: number): number {
+    return Number(price) * this.normalizeLineQuantity(quantity);
+  }
+
+  private computeAmountFromItemDtos(items: OrderItemDto[]): number {
+    return items.reduce(
+      (sum, item) => sum + this.lineRevenue(item.price, item.quantity),
+      0,
+    );
+  }
+
+  private computeTotalUnitsFromItemDtos(items: OrderItemDto[]): number {
+    return items.reduce(
+      (sum, item) => sum + this.normalizeLineQuantity(item.quantity),
+      0,
+    );
+  }
+
+  private async syncOrderHeaderTotals(orderId: number): Promise<void> {
+    const items = await this.orderItemRepository.find({
+      where: { order: { id: orderId } },
+    });
+    const amount = items.reduce(
+      (sum, item) => sum + this.lineRevenue(item.price, item.quantity),
+      0,
+    );
+    const quantity = items.reduce(
+      (sum, item) => sum + this.normalizeLineQuantity(item.quantity),
+      0,
+    );
+    await this.orderRepository.update({ id: orderId }, { amount, quantity });
   }
 }

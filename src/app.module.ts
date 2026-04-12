@@ -25,6 +25,7 @@ import { HealthModule } from './modules/health/health.module';
         PG_USERNAME: Joi.string().required(),
         PG_PASSWORD: Joi.string().required(),
         PG_DATABASE: Joi.string().required(),
+        PG_SSL: Joi.string().optional(),
       }),
     }),
     DashboardModule,

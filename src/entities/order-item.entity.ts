@@ -40,6 +40,10 @@ export class OrderItem {
   })
   quantity: number;
 
+  /** Product unit cost (COGS) at order time; used for historical profit. */
+  @Column({ type: 'double precision', nullable: true })
+  unitCostSnapshot: number | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }

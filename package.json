@@ -20,9 +20,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:generate": "typeorm migration:generate -d dist/database/data-source.js",
-    "migration:run": "typeorm migration:run -d dist/database/data-source.js",
-    "migration:revert": "typeorm migration:revert -d dist/database/data-source.js",
+    "migration:generate": "typeorm migration:generate -d dist/src/database/data-source.js",
+    "migration:run": "typeorm migration:run -d dist/src/database/data-source.js",
+    "migration:revert": "typeorm migration:revert -d dist/src/database/data-source.js",
     "migration:create": "typeorm migration:create src/database/migrations/Migration",
     "docs:openapi": "ts-node -r tsconfig-paths/register scripts/generate-openapi.ts"
   },
@@ -48,7 +48,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "streamifier": "^0.1.1",
-    "typeorm": "^0.3.12"
+    "typeorm": "^0.3.12",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

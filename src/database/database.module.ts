@@ -10,39 +10,43 @@ import {
   OrderSource,
 } from '../entities';
 import { OrderToSource } from 'src/entities/order-to-source.entity';
+import { isPgSslDisabled } from './pg-ssl.util';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('PG_HOST'),
-        port: configService.get('PG_PORT'),
-        username: configService.get('PG_USERNAME'),
-        password: configService.get('PG_PASSWORD'),
-        database: configService.get('PG_DATABASE'),
-        entities: [
-          Product,
-          Customer,
-          Order,
-          User,
-          OrderItem,
-          OrderSource,
-          OrderToSource,
-        ],
-        migrations: [__dirname + '/migrations/**/*.js'],
-        synchronize: false,
-        migrationsRun: false,
-        ssl: {
-          rejectUnauthorized: false,
-        },
-        extra: {
-          sslmode: 'require',
-        },
-        schema: 'public',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const sslOff = isPgSslDisabled(configService.get<string>('PG_SSL'));
+        return {
+          type: 'postgres',
+          host: configService.get('PG_HOST'),
+          port: configService.get('PG_PORT'),
+          username: configService.get('PG_USERNAME'),
+          password: configService.get('PG_PASSWORD'),
+          database: configService.get('PG_DATABASE'),
+          entities: [
+            Product,
+            Customer,
+            Order,
+            User,
+            OrderItem,
+            OrderSource,
+            OrderToSource,
+          ],
+          migrations: [__dirname + '/migrations/**/*.js'],
+          synchronize: false,
+          migrationsRun: false,
+          schema: 'public',
+          ...(sslOff
+            ? {}
+            : {
+                ssl: { rejectUnauthorized: false },
+                extra: { sslmode: 'require' },
+              }),
+        };
+      },
     }),
   ],
 })
